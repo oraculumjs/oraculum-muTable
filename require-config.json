@@ -1,0 +1,33 @@
+{
+  "baseUrl": ".grunt/grunt-contrib-jasmine/build/src",
+  "paths": {
+    "jquery": "../../../../bower_components/jquery/dist/jquery",
+    "backbone": "../../../../bower_components/backbone/backbone",
+    "interact": "../../../../bower_components/interact/interact",
+    "underscore": "../../../../bower_components/underscore/underscore",
+    "Factory": "../../../../bower_components/factoryjs/dist/Factory",
+    "BackboneFactory": "../../../../bower_components/factoryjs/dist/BackboneFactory"
+  },
+  "shim": {
+    "jquery": {
+      "exports": "jQuery"
+    },
+    "underscore": {
+      "exports": "_"
+    },
+    "backbone": {
+      "deps": [
+        "underscore",
+        "jquery"
+      ],
+      "exports": "Backbone"
+    }
+  },
+  "packages": [{
+    "name": "oraculum",
+    "location": "../../../../bower_components/oraculum/dist"
+  }, {
+    "name": "muTable",
+    "location": "."
+  }]
+}

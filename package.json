@@ -1,0 +1,50 @@
+{
+  "name": "Oraculum-muTable",
+  "version": "0.0.1",
+  "keywords": [
+    "list",
+    "sort",
+    "table",
+    "plugin",
+    "mixins",
+    "resize",
+    "chaplin",
+    "factory",
+    "lookout",
+    "backbone",
+    "backgrid",
+    "oraculum",
+    "behaviors",
+    "draggable",
+    "factoryjs",
+    "composition"
+  ],
+  "description": "Draggable interactions for Oraculum's tabular plugin.",
+  "author": "Steve (Egesté) Regester <egeste@lookout.com> (http://egeste.net/)",
+  "homepage": "https://github.com/lookout/oraculum-muTable",
+  "repository": "git://github.com/lookout/oraculum-muTable.git",
+  "bugs": {
+    "url": "https://github.com/lookout/oraculum-muTable/issues",
+    "email": "Steve (Egesté) Regester <egeste@lookout.com> (http://egeste.net/)"
+  },
+  "devDependencies": {
+    "bower": "latest",
+    "grunt-cli": "latest",
+    "underscore": "latest",
+    "grunt-bump": "0.0.13",
+    "grunt-docker": "0.0.8",
+    "grunt-gh-pages": "latest",
+    "grunt-coveralls": "latest",
+    "grunt-coffeelint": "latest",
+    "grunt-contrib-copy": "latest",
+    "grunt-contrib-clean": "latest",
+    "grunt-contrib-watch": "latest",
+    "grunt-contrib-coffee": "latest",
+    "grunt-contrib-jshint": "latest",
+    "grunt-contrib-connect": "latest",
+    "grunt-contrib-jasmine": "~0.5",
+    "grunt-contrib-requirejs": "latest",
+    "grunt-template-jasmine-istanbul": "~0.2.5",
+    "grunt-template-jasmine-requirejs": "egeste/grunt-template-jasmine-requirejs#0.1.6-modules"
+  }
+}

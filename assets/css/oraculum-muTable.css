@@ -1,0 +1,25 @@
+.muTable-column-width-table-mixin {
+  position: relative;
+}
+
+.muTable-column-width-handle-view,
+.muTable-column-width-table-mixin.resizing * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.muTable-column-width-handle-view {
+  top: 0;
+  left: 0;
+  height: 100%;
+  cursor: col-resize;
+  position: absolute;
+}
+
+.muTable-column-width-handle-view:first-child {
+  display: none;
+}
