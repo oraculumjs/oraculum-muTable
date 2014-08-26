@@ -84,6 +84,7 @@
         staticClasses: ['muTable-column-width-table-mixin'],
         muTableColumnWidth: {
           handleWidth: 4,
+          cellSelector: null,
           widthFunction: 'outerWidth'
         },
         subviews: {
@@ -98,12 +99,18 @@
           }
         }
       },
-      mixconfig: function(_arg, _arg1) {
-        var handleWidth, muTableColumnWidth, widthFunction, _ref;
+      mixconfig: function(_arg, options) {
+        var cellSelector, handleWidth, muTableColumnWidth, widthFunction;
         muTableColumnWidth = _arg.muTableColumnWidth;
-        _ref = _arg1 != null ? _arg1 : {}, handleWidth = _ref.handleWidth, widthFunction = _ref.widthFunction;
+        if (options == null) {
+          options = {};
+        }
+        handleWidth = options.handleWidth, cellSelector = options.cellSelector, widthFunction = options.widthFunction;
         if (handleWidth != null) {
           muTableColumnWidth.handleWidth = handleWidth;
+        }
+        if (cellSelector != null) {
+          muTableColumnWidth.cellSelector = cellSelector;
         }
         if (widthFunction != null) {
           return muTableColumnWidth.widthFunction = widthFunction;
@@ -122,23 +129,48 @@
         return this.listenTo(this.columns, 'change:width change:handleLeft', debouncedUpdate);
       },
       _updateOffsets: function() {
-        var firstVisibleRow, handleWidth, widthFunction;
+        var firstVisibleRow;
         if (!(firstVisibleRow = _.find(this.getModelViews(), function(view) {
           return view.$el.is(':visible');
         }))) {
           return;
         }
+        if (_.isFunction(firstVisibleRow.getModelViews)) {
+          return this._updateViewOffsets(firstVisibleRow);
+        } else {
+          return this._updateElementOffsets(firstVisibleRow);
+        }
+      },
+      _updateViewOffsets: function(row) {
+        return _.each(row.getModelViews(), (function(_this) {
+          return function(view) {
+            return _this._updateCellOffset(view, view.$el, view.column);
+          };
+        })(this));
+      },
+      _updateElementOffsets: function(row) {
+        var cellSelector;
+        cellSelector = this.mixinOptions.muTableColumnWidth.cellSelector;
+        return _.each(row.$(cellSelector), (function(_this) {
+          return function(element) {
+            var $element, column;
+            $element = $(element);
+            column = $element.data('column');
+            column || (column = element.column);
+            return _this._updateCellOffset(null, $element, column);
+          };
+        })(this));
+      },
+      _updateCellOffset: function(view, $element, column) {
+        var handleLeft, handleWidth, width, widthFunction;
         handleWidth = this.mixinOptions.muTableColumnWidth.handleWidth;
         widthFunction = this.mixinOptions.muTableColumnWidth.widthFunction;
-        return _.each(firstVisibleRow.getModelViews(), function(view) {
-          var handleLeft, width;
-          width = _.isString(widthFunction) ? view.$el[widthFunction]() : widthFunction.call(view);
-          handleLeft = view.$el.position().left;
-          return view.column.set({
-            width: width,
-            handleLeft: handleLeft,
-            handleWidth: handleWidth
-          });
+        width = _.isString(widthFunction) ? $element[widthFunction]() : widthFunction.call(view || $element);
+        handleLeft = $element.position().left;
+        return column.set({
+          width: width,
+          handleLeft: handleLeft,
+          handleWidth: handleWidth
         });
       }
     }, {

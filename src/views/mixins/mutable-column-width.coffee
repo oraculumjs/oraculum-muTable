@@ -91,6 +91,7 @@ define [
       staticClasses: ['muTable-column-width-table-mixin']
       muTableColumnWidth:
         handleWidth: 4
+        cellSelector: null
         widthFunction: 'outerWidth'
       subviews:
         muTableHandles: ->
@@ -99,8 +100,10 @@ define [
             container: @el
             collection: @columns
 
-    mixconfig: ({muTableColumnWidth}, {handleWidth, widthFunction} = {}) ->
+    mixconfig: ({muTableColumnWidth}, options = {}) ->
+      {handleWidth, cellSelector, widthFunction} = options
       muTableColumnWidth.handleWidth = handleWidth if handleWidth?
+      muTableColumnWidth.cellSelector = cellSelector if cellSelector?
       muTableColumnWidth.widthFunction = widthFunction if widthFunction?
 
     mixinitialize: ->
@@ -113,14 +116,30 @@ define [
     _updateOffsets: ->
       return unless firstVisibleRow = _.find @getModelViews(), (view) ->
         return view.$el.is ':visible'
+      if _.isFunction firstVisibleRow.getModelViews
+      then @_updateViewOffsets firstVisibleRow
+      else @_updateElementOffsets firstVisibleRow
+
+    _updateViewOffsets: (row) ->
+      _.each row.getModelViews(), (view) =>
+        @_updateCellOffset view, view.$el, view.column
+
+    _updateElementOffsets: (row) ->
+      cellSelector = @mixinOptions.muTableColumnWidth.cellSelector
+      _.each row.$(cellSelector), (element) =>
+        $element = $ element
+        column = $element.data 'column'
+        column or= element.column
+        @_updateCellOffset null, $element, column
+
+    _updateCellOffset: (view, $element, column) ->
       handleWidth = @mixinOptions.muTableColumnWidth.handleWidth
       widthFunction = @mixinOptions.muTableColumnWidth.widthFunction
-      _.each firstVisibleRow.getModelViews(), (view) ->
-        width = if _.isString widthFunction
-        then view.$el[widthFunction]()
-        else widthFunction.call view
-        handleLeft = view.$el.position().left
-        view.column.set {width, handleLeft, handleWidth}
+      width = if _.isString widthFunction
+      then $element[widthFunction]()
+      else widthFunction.call view or $element
+      handleLeft = $element.position().left
+      column.set {width, handleLeft, handleWidth}
 
   }, mixins: [
     'Disposable.Mixin'

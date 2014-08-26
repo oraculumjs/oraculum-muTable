@@ -71,6 +71,15 @@ define [
         collection: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
       expect(testView.mixinOptions.muTableColumnWidth.handleWidth).toBe 100
 
+    it 'should allow cellSelector to be be set at construction', ->
+      testView.dispose()
+      testView = Oraculum.get 'muTableColumnWidth.TableMixin.Test.View',
+        container: document.body
+        columns: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
+        collection: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
+        cellSelector: 'DOMNODE'
+      expect(testView.mixinOptions.muTableColumnWidth.cellSelector).toBe 'DOMNODE'
+
     it 'should allow widthFunction to be set at construction', ->
       testView.dispose()
       testView = Oraculum.get 'muTableColumnWidth.TableMixin.Test.View',

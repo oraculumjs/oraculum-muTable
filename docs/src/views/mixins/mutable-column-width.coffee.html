@@ -130,6 +130,7 @@
       <span class="nv">staticClasses: </span><span class="p">[</span><span class="s">&#39;muTable-column-width-table-mixin&#39;</span><span class="p">]</span>
       <span class="nv">muTableColumnWidth:</span>
         <span class="nv">handleWidth: </span><span class="mi">4</span>
+        <span class="nv">cellSelector: </span><span class="kc">null</span>
         <span class="nv">widthFunction: </span><span class="s">&#39;outerWidth&#39;</span>
       <span class="nv">subviews:</span>
         <span class="nv">muTableHandles: </span><span class="nf">-&gt;</span>
@@ -138,8 +139,10 @@
             <span class="nv">container: </span><span class="nx">@el</span>
             <span class="nv">collection: </span><span class="nx">@columns</span>
 
-    <span class="nv">mixconfig: </span><span class="nf">({muTableColumnWidth}, {handleWidth, widthFunction} = {}) -&gt;</span>
+    <span class="nv">mixconfig: </span><span class="nf">({muTableColumnWidth}, options = {}) -&gt;</span>
+      <span class="p">{</span><span class="nx">handleWidth</span><span class="p">,</span> <span class="nx">cellSelector</span><span class="p">,</span> <span class="nx">widthFunction</span><span class="p">}</span> <span class="o">=</span> <span class="nx">options</span>
       <span class="nv">muTableColumnWidth.handleWidth = </span><span class="nx">handleWidth</span> <span class="k">if</span> <span class="nx">handleWidth</span><span class="o">?</span>
+      <span class="nv">muTableColumnWidth.cellSelector = </span><span class="nx">cellSelector</span> <span class="k">if</span> <span class="nx">cellSelector</span><span class="o">?</span>
       <span class="nv">muTableColumnWidth.widthFunction = </span><span class="nx">widthFunction</span> <span class="k">if</span> <span class="nx">widthFunction</span><span class="o">?</span>
 
     <span class="nv">mixinitialize: </span><span class="nf">-&gt;</span>
@@ -152,14 +155,30 @@
     <span class="nv">_updateOffsets: </span><span class="nf">-&gt;</span>
       <span class="k">return</span> <span class="k">unless</span> <span class="nv">firstVisibleRow = </span><span class="nx">_</span><span class="p">.</span><span class="nx">find</span> <span class="nx">@getModelViews</span><span class="p">(),</span> <span class="nf">(view) -&gt;</span>
         <span class="k">return</span> <span class="nx">view</span><span class="p">.</span><span class="nx">$el</span><span class="p">.</span><span class="o">is</span> <span class="s">&#39;:visible&#39;</span>
+      <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isFunction</span> <span class="nx">firstVisibleRow</span><span class="p">.</span><span class="nx">getModelViews</span>
+      <span class="k">then</span> <span class="nx">@_updateViewOffsets</span> <span class="nx">firstVisibleRow</span>
+      <span class="k">else</span> <span class="nx">@_updateElementOffsets</span> <span class="nx">firstVisibleRow</span>
+
+    <span class="nv">_updateViewOffsets: </span><span class="nf">(row) -&gt;</span>
+      <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">row</span><span class="p">.</span><span class="nx">getModelViews</span><span class="p">(),</span> <span class="nf">(view) =&gt;</span>
+        <span class="nx">@_updateCellOffset</span> <span class="nx">view</span><span class="p">,</span> <span class="nx">view</span><span class="p">.</span><span class="nx">$el</span><span class="p">,</span> <span class="nx">view</span><span class="p">.</span><span class="nx">column</span>
+
+    <span class="nv">_updateElementOffsets: </span><span class="nf">(row) -&gt;</span>
+      <span class="nv">cellSelector = </span><span class="nx">@mixinOptions</span><span class="p">.</span><span class="nx">muTableColumnWidth</span><span class="p">.</span><span class="nx">cellSelector</span>
+      <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">row</span><span class="p">.</span><span class="nx">$</span><span class="p">(</span><span class="nx">cellSelector</span><span class="p">),</span> <span class="nf">(element) =&gt;</span>
+        <span class="nv">$element = </span><span class="nx">$</span> <span class="nx">element</span>
+        <span class="nv">column = </span><span class="nx">$element</span><span class="p">.</span><span class="nx">data</span> <span class="s">&#39;column&#39;</span>
+        <span class="nx">column</span> <span class="o">or=</span> <span class="nx">element</span><span class="p">.</span><span class="nx">column</span>
+        <span class="nx">@_updateCellOffset</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">$element</span><span class="p">,</span> <span class="nx">column</span>
+
+    <span class="nv">_updateCellOffset: </span><span class="nf">(view, $element, column) -&gt;</span>
       <span class="nv">handleWidth = </span><span class="nx">@mixinOptions</span><span class="p">.</span><span class="nx">muTableColumnWidth</span><span class="p">.</span><span class="nx">handleWidth</span>
       <span class="nv">widthFunction = </span><span class="nx">@mixinOptions</span><span class="p">.</span><span class="nx">muTableColumnWidth</span><span class="p">.</span><span class="nx">widthFunction</span>
-      <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">firstVisibleRow</span><span class="p">.</span><span class="nx">getModelViews</span><span class="p">(),</span> <span class="nf">(view) -&gt;</span>
-        <span class="nv">width = </span><span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isString</span> <span class="nx">widthFunction</span>
-        <span class="k">then</span> <span class="nx">view</span><span class="p">.</span><span class="nx">$el</span><span class="p">[</span><span class="nx">widthFunction</span><span class="p">]()</span>
-        <span class="k">else</span> <span class="nx">widthFunction</span><span class="p">.</span><span class="nx">call</span> <span class="nx">view</span>
-        <span class="nv">handleLeft = </span><span class="nx">view</span><span class="p">.</span><span class="nx">$el</span><span class="p">.</span><span class="nx">position</span><span class="p">().</span><span class="nx">left</span>
-        <span class="nx">view</span><span class="p">.</span><span class="nx">column</span><span class="p">.</span><span class="nx">set</span> <span class="p">{</span><span class="nx">width</span><span class="p">,</span> <span class="nx">handleLeft</span><span class="p">,</span> <span class="nx">handleWidth</span><span class="p">}</span>
+      <span class="nv">width = </span><span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isString</span> <span class="nx">widthFunction</span>
+      <span class="k">then</span> <span class="nx">$element</span><span class="p">[</span><span class="nx">widthFunction</span><span class="p">]()</span>
+      <span class="k">else</span> <span class="nx">widthFunction</span><span class="p">.</span><span class="nx">call</span> <span class="nx">view</span> <span class="o">or</span> <span class="nx">$element</span>
+      <span class="nv">handleLeft = </span><span class="nx">$element</span><span class="p">.</span><span class="nx">position</span><span class="p">().</span><span class="nx">left</span>
+      <span class="nx">column</span><span class="p">.</span><span class="nx">set</span> <span class="p">{</span><span class="nx">width</span><span class="p">,</span> <span class="nx">handleLeft</span><span class="p">,</span> <span class="nx">handleWidth</span><span class="p">}</span>
 
   <span class="p">},</span> <span class="nv">mixins: </span><span class="p">[</span>
     <span class="s">&#39;Disposable.Mixin&#39;</span>
