@@ -1,8 +1,8 @@
 define [
   'oraculum'
-  'muTable/views/mixins/mutable-width-cell'
   'oraculum/plugins/tabular/views/cells/text'
   'oraculum/plugins/tabular/views/mixins/row'
+  'oraculum/plugins/tabular/views/mixins/variable-width-cell'
 ], (Oraculum) ->
   'use strict'
 
@@ -11,7 +11,7 @@ define [
     tagName: 'td'
   }, {
     inheritMixins: true
-    mixins: ['muTableWidth.CellMixin']
+    mixins: ['VariableWidth.CellMixin']
   }
 
   # Extend a view to make it behave like a row

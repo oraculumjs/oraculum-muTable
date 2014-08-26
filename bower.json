@@ -36,7 +36,7 @@
     "Gruntfile.coffee"
   ],
   "dependencies": {
-    "oraculum": "~0.0.3",
+    "oraculum": ">=0.0.5",
     "interact": "~1.0.20"
   },
   "devDependencies": {
