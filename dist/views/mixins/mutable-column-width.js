@@ -1,5 +1,5 @@
 (function() {
-  define(['oraculum', 'muTable/libs', 'oraculum/mixins/listener', 'oraculum/mixins/disposable', 'oraculum/mixins/evented-method', 'oraculum/views/mixins/attach', 'oraculum/views/mixins/subview', 'oraculum/views/mixins/auto-render', 'oraculum/views/mixins/static-classes', 'oraculum/plugins/tabular/views/mixins/row', 'oraculum/plugins/tabular/views/mixins/cell', 'oraculum/plugins/tabular/views/mixins/table'], function(Oraculum) {
+  define(['oraculum', 'muTable/libs', 'oraculum/mixins/listener', 'oraculum/mixins/disposable', 'oraculum/mixins/evented-method', 'oraculum/views/mixins/list', 'oraculum/views/mixins/attach', 'oraculum/views/mixins/subview', 'oraculum/views/mixins/auto-render', 'oraculum/views/mixins/static-classes', 'oraculum/plugins/tabular/views/mixins/table'], function(Oraculum) {
     'use strict';
     var interact;
     interact = Oraculum.get('interact');
@@ -51,22 +51,22 @@
       _onmove: function(_arg) {
         var columns, handleLeft, pageX, prevColumn, prevWidth, thisIndex, thisWidth;
         pageX = _arg.pageX;
-        columns = this.column.collection;
-        thisWidth = this.column.get('width');
-        thisIndex = columns.indexOf(this.column);
-        handleLeft = this.column.get('handleLeft');
+        columns = this.model.collection;
+        thisWidth = this.model.get('width');
+        thisIndex = columns.indexOf(this.model);
+        handleLeft = this.model.get('handleLeft');
         prevColumn = columns.at(thisIndex - 1);
         prevWidth = prevColumn.get('width');
         prevColumn.set({
           width: prevWidth + pageX
         });
-        return this.column.set({
+        return this.model.set({
           width: thisWidth - pageX,
           handleLeft: handleLeft + pageX
         });
       }
     }, {
-      mixins: ['Listener.Mixin', 'Disposable.Mixin', 'EventedMethod.Mixin', 'Cell.ViewMixin', 'StaticClasses.ViewMixin']
+      mixins: ['Listener.Mixin', 'Disposable.Mixin', 'EventedMethod.Mixin', 'StaticClasses.ViewMixin']
     });
     Oraculum.extend('View', '_MutableColumnWidthHandles.View', {
       tagName: 'aside',
@@ -77,7 +77,7 @@
         }
       }
     }, {
-      mixins: ['Disposable.Mixin', 'Row.ViewMixin', 'Attach.ViewMixin', 'StaticClasses.ViewMixin', 'AutoRender.ViewMixin']
+      mixins: ['Disposable.Mixin', 'List.ViewMixin', 'StaticClasses.ViewMixin', 'Attach.ViewMixin', 'AutoRender.ViewMixin']
     });
     return Oraculum.defineMixin('muTableColumnWidth.TableMixin', {
       mixinOptions: {

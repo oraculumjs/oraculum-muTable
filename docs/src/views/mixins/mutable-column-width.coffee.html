@@ -45,12 +45,11 @@
   <span class="s">&#39;oraculum/mixins/disposable&#39;</span>
   <span class="s">&#39;oraculum/mixins/evented-method&#39;</span>
 
+  <span class="s">&#39;oraculum/views/mixins/list&#39;</span>
   <span class="s">&#39;oraculum/views/mixins/attach&#39;</span>
   <span class="s">&#39;oraculum/views/mixins/subview&#39;</span>
   <span class="s">&#39;oraculum/views/mixins/auto-render&#39;</span>
   <span class="s">&#39;oraculum/views/mixins/static-classes&#39;</span>
-  <span class="s">&#39;oraculum/plugins/tabular/views/mixins/row&#39;</span>
-  <span class="s">&#39;oraculum/plugins/tabular/views/mixins/cell&#39;</span>
   <span class="s">&#39;oraculum/plugins/tabular/views/mixins/table&#39;</span>
 <span class="p">],</span> <span class="nf">(Oraculum) -&gt;</span>
   <span class="s">&#39;use strict&#39;</span>
@@ -90,14 +89,14 @@
         <span class="nv">axis: </span><span class="s">&#39;x&#39;</span>
 
     <span class="nv">_onmove: </span><span class="nf">({pageX}) -&gt;</span>
-      <span class="nv">columns = </span><span class="nx">@column</span><span class="p">.</span><span class="nx">collection</span>
-      <span class="nv">thisWidth = </span><span class="nx">@column</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;width&#39;</span>
-      <span class="nv">thisIndex = </span><span class="nx">columns</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">@column</span>
-      <span class="nv">handleLeft = </span><span class="nx">@column</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;handleLeft&#39;</span>
+      <span class="nv">columns = </span><span class="nx">@model</span><span class="p">.</span><span class="nx">collection</span>
+      <span class="nv">thisWidth = </span><span class="nx">@model</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;width&#39;</span>
+      <span class="nv">thisIndex = </span><span class="nx">columns</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">@model</span>
+      <span class="nv">handleLeft = </span><span class="nx">@model</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;handleLeft&#39;</span>
       <span class="nv">prevColumn = </span><span class="nx">columns</span><span class="p">.</span><span class="nx">at</span> <span class="nx">thisIndex</span> <span class="o">-</span> <span class="mi">1</span>
       <span class="nv">prevWidth = </span><span class="nx">prevColumn</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;width&#39;</span>
       <span class="nx">prevColumn</span><span class="p">.</span><span class="nx">set</span> <span class="nv">width: </span><span class="nx">prevWidth</span> <span class="o">+</span> <span class="nx">pageX</span>
-      <span class="nx">@column</span><span class="p">.</span><span class="nx">set</span>
+      <span class="nx">@model</span><span class="p">.</span><span class="nx">set</span>
         <span class="nv">width: </span><span class="nx">thisWidth</span> <span class="o">-</span> <span class="nx">pageX</span>
         <span class="nv">handleLeft: </span><span class="nx">handleLeft</span> <span class="o">+</span> <span class="nx">pageX</span>
 
@@ -105,7 +104,6 @@
     <span class="s">&#39;Listener.Mixin&#39;</span>
     <span class="s">&#39;Disposable.Mixin&#39;</span>
     <span class="s">&#39;EventedMethod.Mixin&#39;</span>
-    <span class="s">&#39;Cell.ViewMixin&#39;</span>
     <span class="s">&#39;StaticClasses.ViewMixin&#39;</span>
   <span class="p">]</span>
 
@@ -118,9 +116,9 @@
 
   <span class="p">},</span> <span class="nv">mixins: </span><span class="p">[</span>
     <span class="s">&#39;Disposable.Mixin&#39;</span>
-    <span class="s">&#39;Row.ViewMixin&#39;</span>
-    <span class="s">&#39;Attach.ViewMixin&#39;</span>
+    <span class="s">&#39;List.ViewMixin&#39;</span>
     <span class="s">&#39;StaticClasses.ViewMixin&#39;</span>
+    <span class="s">&#39;Attach.ViewMixin&#39;</span>
     <span class="s">&#39;AutoRender.ViewMixin&#39;</span>
   <span class="p">]</span>
 

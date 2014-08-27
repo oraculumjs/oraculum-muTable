@@ -6,12 +6,11 @@ define [
   'oraculum/mixins/disposable'
   'oraculum/mixins/evented-method'
 
+  'oraculum/views/mixins/list'
   'oraculum/views/mixins/attach'
   'oraculum/views/mixins/subview'
   'oraculum/views/mixins/auto-render'
   'oraculum/views/mixins/static-classes'
-  'oraculum/plugins/tabular/views/mixins/row'
-  'oraculum/plugins/tabular/views/mixins/cell'
   'oraculum/plugins/tabular/views/mixins/table'
 ], (Oraculum) ->
   'use strict'
@@ -51,14 +50,14 @@ define [
         axis: 'x'
 
     _onmove: ({pageX}) ->
-      columns = @column.collection
-      thisWidth = @column.get 'width'
-      thisIndex = columns.indexOf @column
-      handleLeft = @column.get 'handleLeft'
+      columns = @model.collection
+      thisWidth = @model.get 'width'
+      thisIndex = columns.indexOf @model
+      handleLeft = @model.get 'handleLeft'
       prevColumn = columns.at thisIndex - 1
       prevWidth = prevColumn.get 'width'
       prevColumn.set width: prevWidth + pageX
-      @column.set
+      @model.set
         width: thisWidth - pageX
         handleLeft: handleLeft + pageX
 
@@ -66,7 +65,6 @@ define [
     'Listener.Mixin'
     'Disposable.Mixin'
     'EventedMethod.Mixin'
-    'Cell.ViewMixin'
     'StaticClasses.ViewMixin'
   ]
 
@@ -79,9 +77,9 @@ define [
 
   }, mixins: [
     'Disposable.Mixin'
-    'Row.ViewMixin'
-    'Attach.ViewMixin'
+    'List.ViewMixin'
     'StaticClasses.ViewMixin'
+    'Attach.ViewMixin'
     'AutoRender.ViewMixin'
   ]
 
