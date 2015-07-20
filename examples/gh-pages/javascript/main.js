@@ -15,7 +15,6 @@ requirejs.config({
     // Util libs
     'jquery': '../../../../jquery/dist/jquery',
     'backbone': '../../../../backbone/backbone',
-    'interact': '../../../../interact/interact',
     'bootstrap': '../../../../bootstrap-css/js/bootstrap',
     'underscore': '../../../../underscore/underscore',
 
@@ -30,11 +29,11 @@ requirejs.config({
 
   shim: {
     bootstrap: {deps: ['jquery']},
-
     marked: { exports: 'marked' },
     highlight: { exports: 'hljs' },
-
     jquery: { exports: 'jQuery' },
+    'jquery-ui/sortable': ['jquery'],
+    'jquery-ui/draggable': ['jquery'],
     underscore: { exports: '_' },
     backbone: {
       deps: ['jquery', 'underscore'],
@@ -45,6 +44,9 @@ requirejs.config({
   packages: [{
     name: 'oraculum',
     location: '../../../../oraculum/dist'
+  }, {
+    name: 'jquery-ui',
+    location: '../../../../jquery-ui/ui/'
   }, {
     name: 'muTable',
     location: '../../../../../dist'

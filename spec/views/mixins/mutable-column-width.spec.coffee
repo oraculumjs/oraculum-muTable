@@ -1,19 +1,7 @@
-define [
-  'oraculum'
-  'muTable/libs'
-  'oraculum/libs'
-  'oraculum/mixins/disposable'
-  'oraculum/models/mixins/disposable'
-  'oraculum/views/mixins/remove-disposed'
-  'oraculum/plugins/tabular/views/cells/text'
-  'oraculum/plugins/tabular/views/mixins/row'
-  'oraculum/plugins/tabular/views/mixins/table'
-  'muTable/views/mixins/mutable-column-width'
-], (Oraculum) ->
+define ['oraculum'], (Oraculum) ->
   'use strict'
 
   $ = Oraculum.get 'jQuery'
-  interact = Oraculum.get 'interact'
 
   describe 'muTableColumnWidth.TableMixin', ->
 

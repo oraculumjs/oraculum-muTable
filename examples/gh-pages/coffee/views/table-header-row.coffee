@@ -4,7 +4,7 @@ define [
   'oraculum/views/mixins/auto-render'
   'oraculum/plugins/tabular/views/mixins/row'
   'oraculum/plugins/tabular/views/cells/header'
-  'muTable/views/mixins/mutable-column-order-cell'
+  'muTable/views/mixins/mutable-column-order'
 ], (Oraculum) ->
   'use strict'
 
@@ -19,9 +19,11 @@ define [
   Oraculum.extend 'View', 'SortableColumnHeader.Row', {
     tagName: 'tr'
     mixinOptions:
-      list: modelView: 'SortableColumnHeader.Cell'
+      list:
+        modelView: 'SortableColumnHeader.Cell'
   }, mixins: [
     'Row.ViewMixin'
+    'muTableColumnOrder.RowMixin'
     'Attach.ViewMixin'
     'AutoRender.ViewMixin'
   ]

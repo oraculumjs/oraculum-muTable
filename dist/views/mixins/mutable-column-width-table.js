@@ -1,8 +1,6 @@
 (function() {
-  define(['oraculum', 'muTable/libs', 'oraculum/mixins/listener', 'oraculum/mixins/disposable', 'oraculum/mixins/evented-method', 'oraculum/views/mixins/list', 'oraculum/views/mixins/attach', 'oraculum/views/mixins/subview', 'oraculum/views/mixins/auto-render', 'oraculum/views/mixins/static-classes', 'oraculum/plugins/tabular/views/mixins/table'], function(Oraculum) {
+  define(['oraculum', 'oraculum/mixins/listener', 'oraculum/mixins/disposable', 'oraculum/mixins/evented-method', 'oraculum/views/mixins/list', 'oraculum/views/mixins/attach', 'oraculum/views/mixins/subview', 'oraculum/views/mixins/auto-render', 'oraculum/views/mixins/static-classes', 'oraculum/plugins/tabular/views/mixins/table', 'jquery-ui/draggable'], function(Oraculum) {
     'use strict';
-    var interact;
-    interact = Oraculum.get('interact');
     Oraculum.extend('View', '_MutableColumnWidthHandle.View', {
       mixinOptions: {
         staticClasses: ['muTable-column-width-handle-view'],
@@ -48,9 +46,9 @@
           axis: 'x'
         });
       },
-      _onmove: function(_arg) {
+      _onmove: function(arg) {
         var columns, handleLeft, pageX, prevColumn, prevWidth, thisIndex, thisWidth;
-        pageX = _arg.pageX;
+        pageX = arg.pageX;
         columns = this.model.collection;
         thisWidth = this.model.get('width');
         thisIndex = columns.indexOf(this.model);
@@ -99,9 +97,9 @@
           }
         }
       },
-      mixconfig: function(_arg, options) {
+      mixconfig: function(arg, options) {
         var cellSelector, handleWidth, muTableColumnWidth, widthFunction;
-        muTableColumnWidth = _arg.muTableColumnWidth;
+        muTableColumnWidth = arg.muTableColumnWidth;
         if (options == null) {
           options = {};
         }

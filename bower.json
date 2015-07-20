@@ -36,23 +36,22 @@
     "Gruntfile.coffee"
   ],
   "dependencies": {
-    "oraculum": ">=0.0.5",
-    "interact": "~1.0.20"
+    "oraculum": ">=0.1.7",
+    "jquery-ui": "~1.11.4"
   },
   "devDependencies": {
     "jquery": "~2.1.1",
     "marked": "~0.3.2",
     "requirejs": "~2.1.14",
     "require-cs": "~0.5.0",
+    "underscore": "<1.8.0",
     "highlightjs": "latest",
     "requirejs-text": "~2.0.12",
     "bootstrap-css": "latest",
     "coffee-script": "latest",
-
-    "sinon": "~1.7",
-    "jasmine-sinon": "~0.3",
-    "jasmine-jquery": "1.5.8",
-    "jasmine-matchers": "uxebu/jasmine-matchers#33e09d6b98ce190d0dff000e16a90f85e72d920f",
-    "jasmine-matchers-util": "JamieMason/Jasmine-Matchers#bfdb8e3cc50b48468e719243e65f2cf6d11ab066"
+    "sinonjs": "1.10.2",
+    "jasmine-sinon": "latest",
+    "jasmine-jquery": "2.1.0",
+    "jasmine-expect": "~1.22.3"
   }
 }

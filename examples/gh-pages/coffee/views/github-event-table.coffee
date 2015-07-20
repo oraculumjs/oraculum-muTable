@@ -6,7 +6,7 @@ define [
   'oraculum/plugins/tabular/views/mixins/table'
   'cs!mu/examples/gh-pages/coffee/views/github-event-row'
   'cs!mu/examples/gh-pages/coffee/views/table-header-row'
-  'muTable/views/mixins/mutable-column-width'
+  # 'muTable/views/mixins/mutable-column-width'
 ], (Oraculum) ->
   'use strict'
 
@@ -33,7 +33,7 @@ define [
       'Table.ViewMixin'
       'Attach.ViewMixin'
       'HTMLTemplating.ViewMixin'
-      'muTableColumnWidth.TableMixin'
+      # 'muTableColumnWidth.TableMixin'
       'AutoRender.ViewMixin'
     ]
   }

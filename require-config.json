@@ -12,6 +12,8 @@
     "jquery": {
       "exports": "jQuery"
     },
+    "jquery-ui/sortable": ["jquery"],
+    "jquery-ui/draggable": ["jquery"],
     "underscore": {
       "exports": "_"
     },
@@ -26,6 +28,9 @@
   "packages": [{
     "name": "oraculum",
     "location": "../../../../bower_components/oraculum/dist"
+  }, {
+    "name": "jquery-ui",
+    "location": "../../../../bower_components/jquery-ui/ui/"
   }, {
     "name": "muTable",
     "location": "."

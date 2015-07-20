@@ -1,6 +1,5 @@
 define [
   'oraculum'
-  'muTable/libs'
 
   'oraculum/mixins/listener'
   'oraculum/mixins/disposable'
@@ -12,10 +11,10 @@ define [
   'oraculum/views/mixins/auto-render'
   'oraculum/views/mixins/static-classes'
   'oraculum/plugins/tabular/views/mixins/table'
+
+  'jquery-ui/draggable'
 ], (Oraculum) ->
   'use strict'
-
-  interact = Oraculum.get 'interact'
 
   Oraculum.extend 'View', '_MutableColumnWidthHandle.View', {
 

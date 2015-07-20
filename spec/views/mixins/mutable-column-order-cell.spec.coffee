@@ -1,13 +1,5 @@
-define [
-  'oraculum'
-  'muTable/libs'
-  'oraculum/views/mixins/attach'
-  'oraculum/views/mixins/auto-render'
-  'muTable/views/mixins/mutable-column-order-cell'
-], (Oraculum) ->
+define ['oraculum'], (Oraculum) ->
   'use strict'
-
-  interact = Oraculum.get 'interact'
 
   describe 'muTableColumnOrder.CellMixin', ->
 

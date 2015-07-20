@@ -34,14 +34,17 @@ define [
       }, {
         label: 'Actor'
         sortable: true
+        orderable: true
         attribute: 'actor.login'
       }, {
         label: 'Event Type'
         sortable: true
+        orderable: true
         attribute: 'type'
       }, {
         label: 'Repo Name'
         sortable: true
+        orderable: true
         attribute: 'repo.name'
       }], sortCollection: collection
       controller.reuse 'table-demo', 'GithubEvents.Table',
