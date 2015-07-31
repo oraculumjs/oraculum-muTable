@@ -1,6 +1,6 @@
 {
-  "name": "Oraculum-muTable",
-  "version": "0.0.4",
+  "name": "oraculum-mutable",
+  "version": "1.0.0",
   "keywords": [
     "list",
     "sort",

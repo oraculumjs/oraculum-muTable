@@ -4,65 +4,32 @@
 
   define(['oraculum', 'oraculum/libs', 'oraculum/views/mixins/static-classes', 'oraculum/plugins/tabular/views/mixins/row', 'oraculum/plugins/tabular/views/mixins/cell', 'jquery-ui/sortable'], function(Oraculum) {
     'use strict';
-    var SORT_EVENTS, _, composeConfig, resolveViewTarget;
+    var $, SORT_EVENTS, _;
+    $ = Oraculum.get('jQuery');
     _ = Oraculum.get('underscore');
-    composeConfig = Oraculum.get('composeConfig');
-    resolveViewTarget = Oraculum.get('resolveViewTarget');
     SORT_EVENTS = ['sortactivate', 'sortdeactivate', 'sortstart', 'sortbeforeStop', 'sortstop', 'sortcreate', 'sortremove', 'sortchange', 'sortupdate', 'sort', 'sortout', 'sortover', 'sortreceive'];
     Oraculum.defineMixin('muTableColumnOrder.CellMixin', {
-      mixinOptions: {
-        staticClasses: ['mutable-column-order-cell-mixin']
-      },
       mixinitialize: function() {
-        var column;
-        column = this._resolveCellColumn();
-        this.listenTo(column, 'change:attribute', (function(_this) {
-          return function() {
-            return _this._updateColumnAttribute();
-          };
-        })(this));
-        this.listenTo(column, 'change:orderable', (function(_this) {
+        if (indexOf.call(this.__activeMixins(), 'Cell.ViewMixin') < 0) {
+          throw new TypeError('muTableColumnOrder.CellMixin must be used with Cell.ViewMixin.');
+        }
+        this.listenTo(this.column, 'change:orderable', (function(_this) {
           return function() {
             return _this._updateColumnOrderable();
           };
         })(this));
-        return this._updateMutableColumnOrderAttributes();
-      },
-      _updateMutableColumnOrderAttributes: function() {
-        this._updateColumnAttribute();
         return this._updateColumnOrderable();
       },
-      _updateColumnAttribute: function() {
-        var column;
-        column = this._resolveCellColumn();
-        return this.$el.attr('data-column-attr', column.get('attribute'));
-      },
       _updateColumnOrderable: function() {
-        var column;
-        column = this._resolveCellColumn();
-        return this.$el.toggleClass('unorderable-cell', !Boolean(column.get('orderable')));
-      },
-      _resolveCellColumn: function() {
-        var cellOptions;
-        cellOptions = this.mixinOptions.cell;
-        if (_.isFunction(cellOptions)) {
-          cellOptions = cellOptions.call(this);
-        }
-        return cellOptions.column;
+        return this.$el.toggleClass('unorderable-cell', !Boolean(this.column.get('orderable')));
       }
-    }, {
-      mixins: ['StaticClasses.ViewMixin', 'Cell.ViewMixin']
     });
-    return Oraculum.defineMixin('muTableColumnOrder.RowMixin', {
+    Oraculum.defineMixin('muTableColumnOrder.RowMixin', {
       mixinOptions: {
-        staticClasses: ['mutable-column-order-row-mixin'],
-        eventedMethods: {
-          initModelView: {}
-        },
         muTableColumnOrder: {
           target: null,
           axis: 'x',
-          items: '> .cell',
+          items: '> .cell_view-mixin',
           cursor: 'move',
           helper: 'clone',
           cancel: '.unorderable-cell',
@@ -72,22 +39,29 @@
       mixconfig: function(mixinOptions, arg) {
         var muTableColumnOrder;
         muTableColumnOrder = (arg != null ? arg : {}).muTableColumnOrder;
-        return mixinOptions.muTableColumnOrder = composeConfig(mixinOptions.muTableColumnOrder, muTableColumnOrder);
+        return mixinOptions.muTableColumnOrder = Oraculum.composeConfig(mixinOptions.muTableColumnOrder, muTableColumnOrder);
       },
       mixinitialize: function() {
+        if (indexOf.call(this.__activeMixins(), 'Row.ViewMixin') < 0) {
+          throw new TypeError('muTableColumnOrder.RowMixin must be used with Row.ViewMixin.');
+        }
+        this._ensureSortableColumnCells();
+        if (this.getModelViews().length > 0) {
+          this._initSortablePlugin();
+        }
         this.once('visibilityChange', (function(_this) {
           return function() {
-            return _this._initSortable.apply(_this, arguments);
+            return _this._initSortablePlugin.apply(_this, arguments);
           };
         })(this));
         this.on('visibilityChange', (function(_this) {
           return function() {
-            return _this._refreshSortable.apply(_this, arguments);
+            return _this._refreshSortablePlugin.apply(_this, arguments);
           };
         })(this));
-        this.on('dispose:before', (function(_this) {
+        this.on('dispose', (function(_this) {
           return function() {
-            return _this._destroySortable.apply(_this, arguments);
+            return _this._destroySortablePlugin.apply(_this, arguments);
           };
         })(this));
         return this.on('sortupdate', (function(_this) {
@@ -96,60 +70,60 @@
           };
         })(this));
       },
-      initModelView: function(model) {
-        var modelView, view, viewOptions;
-        view = this.resolveModelView(model);
-        viewOptions = this.resolveViewOptions(model);
-        modelView = this.createView({
-          view: view,
-          viewOptions: viewOptions
+      _ensureSortableColumnCells: function() {
+        return _.each(this.getModelViews(), function(view) {
+          return view.__mixin('muTableColumnOrder.CellMixin');
         });
-        if (indexOf.call(modelView.__mixins(), 'muTableColumnOrder.CellMixin') < 0) {
-          throw new TypeError(view + " fails to implement muTableColumnOrder.CellMixin");
-        }
-        return modelView;
       },
       getSortableAttributeOrder: function() {
-        var $target;
-        $target = this._resolveSortableTarget();
-        return $target.sortable('toArray', {
+        if (!this._sortablePluginInitialized) {
+          return;
+        }
+        return this._resolveSortableTarget().sortable('toArray', {
           attribute: 'data-column-attr'
         });
       },
-      _initSortable: function() {
+      _initSortablePlugin: function() {
         var $target, options;
+        if (this._sortablePluginInitialized) {
+          return;
+        }
         options = this.mixinOptions.muTableColumnOrder;
         if (_.isFunction(options)) {
           options = options.call(this);
         }
         $target = this._resolveSortableTarget();
         $target.sortable(options);
-        return _.each(SORT_EVENTS, (function(_this) {
+        _.each(SORT_EVENTS, (function(_this) {
           return function(sortEvent) {
             return $target.on(sortEvent, function() {
-              console.log(sortEvent);
               return _this.trigger.apply(_this, [sortEvent].concat(slice.call(arguments)));
             });
           };
         })(this));
+        return this._sortablePluginInitialized = true;
       },
-      _refreshSortable: function() {
-        var $target;
-        $target = this._resolveSortableTarget();
-        return $target.sortable('refresh');
+      _refreshSortablePlugin: function() {
+        this._ensureSortableColumnCells();
+        if (!this._sortablePluginInitialized) {
+          return;
+        }
+        return this._resolveSortableTarget().sortable('refresh');
       },
-      _destroySortable: function() {
-        var $target;
-        $target = this._resolveSortableTarget();
-        return $target.sortable('destroy');
+      _destroySortablePlugin: function() {
+        if (!this._sortablePluginInitialized) {
+          return;
+        }
+        this._resolveSortableTarget().sortable('destroy');
+        return this._sortablePluginInitialized = false;
       },
       _resolveSortableTarget: function() {
-        var $target, options;
+        var options;
         options = this.mixinOptions.muTableColumnOrder;
         if (_.isFunction(options)) {
           options = options.call(this);
         }
-        return $target = resolveViewTarget(this, options.target);
+        return Oraculum.resolveViewTarget(this, options.target);
       },
       _handleSortableUpdate: function() {
         var nwo;
@@ -165,8 +139,24 @@
         };
         return this.collection.sort();
       }
-    }, {
-      mixins: ['Row.ViewMixin', 'StaticClasses.ViewMixin']
+    });
+    return Oraculum.defineMixin('muTableColumnOrder.TableMixin', {
+      mixinitialize: function() {
+        if (indexOf.call(this.__activeMixins(), 'Table.ViewMixin') < 0) {
+          throw new TypeError('muTableColumnOrder.TableMixin must be used with Table.ViewMixin.');
+        }
+        this.on('visibilityChange', (function(_this) {
+          return function() {
+            return _this._ensureSortableColumnRows();
+          };
+        })(this));
+        return this._ensureSortableColumnRows();
+      },
+      _ensureSortableColumnRows: function() {
+        return _.each(this.getModelViews(), function(view) {
+          return view.__mixin('muTableColumnOrder.RowMixin');
+        });
+      }
     });
   });
 

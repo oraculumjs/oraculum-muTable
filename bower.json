@@ -1,6 +1,6 @@
 {
   "name": "Oraculum-muTable",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "keywords": [
     "list",
     "sort",
@@ -49,6 +49,7 @@
     "requirejs-text": "~2.0.12",
     "bootstrap-css": "latest",
     "coffee-script": "latest",
+
     "sinonjs": "1.10.2",
     "jasmine-sinon": "latest",
     "jasmine-jquery": "2.1.0",

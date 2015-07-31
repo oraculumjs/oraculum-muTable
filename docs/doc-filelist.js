@@ -1,1 +1,1 @@
-var tree={"files":["LICENSE.md","README.md"],"dirs":{"src":{"files":["main.coffee"],"dirs":{"views":{"dirs":{"mixins":{"files":["mutable-column-order.coffee","mutable-column-width-table.coffee"]}}}}}}};
+var tree={"files":["LICENSE.md","README.md"],"dirs":{"src":{"files":["main.coffee"],"dirs":{"views":{"dirs":{"mixins":{"files":["mutable-column-order.coffee","mutable-column-width.coffee"]}}}}}}};

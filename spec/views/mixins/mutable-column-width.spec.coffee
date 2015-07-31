@@ -1,227 +1,169 @@
-define ['oraculum'], (Oraculum) ->
+define [
+  'oraculum'
+  'oraculum/libs'
+
+  'oraculum/mixins/disposable'
+  'oraculum/models/mixins/disposable'
+
+  'oraculum/plugins/tabular/views/mixins/table'
+  'oraculum/plugins/tabular/views/mixins/row'
+  'oraculum/plugins/tabular/views/mixins/cell'
+
+  'oraculum/plugins/tabular/views/cells/text'
+], (Oraculum) ->
   'use strict'
 
   $ = Oraculum.get 'jQuery'
 
-  describe 'muTableColumnWidth.TableMixin', ->
+  describe 'muTableColumnWidth mixin suite', ->
 
-    Oraculum.extend 'Model', 'Disposable.muTableColumnWidth.TableMixin.Test.Model', {
-    }, mixins: ['Disposable.Mixin']
+    Oraculum.extend 'View', 'muTableColumnWidth.CellMixin.Test.View', {
+    }, mixins: [
+      'Disposable.Mixin'
+      'Cell.ViewMixin'
+      'muTableColumnWidth.CellMixin'
+    ]
 
-    Oraculum.extend 'Collection', 'Disposable.muTableColumnWidth.TableMixin.Test.Collection', {
-      model: 'Disposable.muTableColumnWidth.TableMixin.Test.Model'
-    }, mixins: ['Disposable.CollectionMixin']
+    Oraculum.extend 'View', 'muTableColumnWidth.RowMixin.Test.View', {
+      mixinOptions: list: modelView: 'Text.Cell'
+    }, mixins: [
+      'Disposable.Mixin'
+      'Row.ViewMixin'
+      'muTableColumnWidth.RowMixin'
+    ]
 
-    Oraculum.extend 'View', 'muTableColumnWidth.TableMixin.Test.Row', {
-      mixinOptions:
-        list:
-          modelView: 'Text.Cell'
-          viewOptions: tagName: 'td'
+    Oraculum.extend 'View', 'muTableColumnWidth.RowMixin.Test1.View', {
+      mixinOptions: list: modelView: 'Text.Cell'
     }, mixins: [
       'Disposable.Mixin'
       'Row.ViewMixin'
     ]
 
     Oraculum.extend 'View', 'muTableColumnWidth.TableMixin.Test.View', {
-      tagName: 'table'
-
-      mixinOptions:
-        disposable:
-          disposeAll: true
-        list:
-          modelView: 'muTableColumnWidth.TableMixin.Test.Row'
-          viewOptions: tagName: 'tr'
-
+      mixinOptions: list: modelView: 'muTableColumnWidth.RowMixin.Test1.View'
     }, mixins: [
       'Disposable.Mixin'
-      'Attach.ViewMixin'
-      'RemoveDisposed.ViewMixin'
+      'Table.ViewMixin'
       'muTableColumnWidth.TableMixin'
     ]
 
-    testView = null
+    row = undefined
+    cell = undefined
+    table = undefined
+    columns = column = undefined
+    collection = model = undefined
 
     beforeEach ->
-      testView = Oraculum.get 'muTableColumnWidth.TableMixin.Test.View',
-        container: document.body
-        columns: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
-        collection: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
+      model = Oraculum.get 'Model', {'attribute'}
+      column = Oraculum.get 'Model', {'attribute'}
+      columns = Oraculum.get 'Collection', [column]
+      collection = Oraculum.get 'Collection', [model]
 
     afterEach ->
-      testView.dispose()
+      model.__mixin 'Disposable.Mixin'
+      column.__mixin 'Disposable.Mixin'
+      columns.__mixin('Disposable.CollectionMixin', { disposable: disposeModels: true }).dispose()
+      collection.__mixin('Disposable.CollectionMixin', { disposable: disposeModels: true }).dispose()
 
-    it 'should allow handleWidth to be be set at construction', ->
-      testView.dispose()
-      testView = Oraculum.get 'muTableColumnWidth.TableMixin.Test.View',
-        container: document.body
-        handleWidth: 100
-        columns: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
-        collection: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
-      expect(testView.mixinOptions.muTableColumnWidth.handleWidth).toBe 100
+    describe 'muTableColumnWidth.CellMixin', ->
 
-    it 'should allow cellSelector to be be set at construction', ->
-      testView.dispose()
-      testView = Oraculum.get 'muTableColumnWidth.TableMixin.Test.View',
-        container: document.body
-        columns: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
-        collection: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
-        cellSelector: 'DOMNODE'
-      expect(testView.mixinOptions.muTableColumnWidth.cellSelector).toBe 'DOMNODE'
+      resizable = undefined
+      resizableInit = undefined
+      resizableDisable = undefined
+      resizableDestroy = undefined
 
-    it 'should allow widthFunction to be set at construction', ->
-      testView.dispose()
-      testView = Oraculum.get 'muTableColumnWidth.TableMixin.Test.View',
-        container: document.body
-        widthFunction: 'innerWidth'
-        columns: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
-        collection: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
-      expect(testView.mixinOptions.muTableColumnWidth.widthFunction).toBe 'innerWidth'
-
-    it 'should render a muTableHandles subview', ->
-      testView.render()
-      muTableHandles = testView.subview 'muTableHandles'
-      expect(muTableHandles.__type()).toBe '_MutableColumnWidthHandles.View'
-      expect(muTableHandles.el.parentNode).toBe testView.el
-      expect(muTableHandles.collection).toBe testView.columns
-
-    describe 'reactionary behavior', ->
-      row = null
-      column = null
-      _updateOffsets = null
+      mockEvent = {}
+      mockUIObject = size: width: 100
 
       beforeEach ->
-        row = testView.collection.add {'attribute'}, silent: true
-        column = testView.columns.add {'attribute'}, silent: true
-        _updateOffsets = sinon.spy testView, '_updateOffsets'
+        cell = Oraculum.get 'muTableColumnWidth.CellMixin.Test.View', {model, column}
+        resizable = sinon.stub $.fn, 'resizable'
+        resizableInit = resizable.withArgs cell.mixinOptions.muTableColumnWidth
+        resizableDestroy = resizable.withArgs 'destroy'
+        resizableDisable = resizable.withArgs 'option', 'disabled'
 
       afterEach ->
-        _updateOffsets.restore()
+        cell.dispose()
+        resizable.restore()
 
-      # We describe _updateOffsets underneath reactionary behavior because
-      # it is the common implementation across all of our event hooks, and
-      # would be redundant to repeat the tests for each callback.
+      it 'should throw if mixed into an object that fails to implement Cell.ViewMixin', ->
+        expect(-> Oraculum.get('View').__mixin 'muTableColumnWidth.CellMixin').toThrow()
 
-      describe '_updateOffsets', ->
+      it 'should forward plugin events through the view', ->
+        cell.trigger 'addedToParent'
+        _.each ['resize','resizestop','resizestart','resizecreate'], (eventName) ->
+          cell.on eventName, stub = sinon.stub()
+          cell._resolveResizableTarget().trigger eventName, mockUIObject
+          expect(stub).toHaveBeenCalledOnce()
 
-        Oraculum.onTag 'Disposable.muTableColumnWidth.TableMixin.Test.Model', (model) ->
-          sinon.spy model, 'set'
+      it 'should initialize the jQuery UI resizable plugin in the target cell element only once', ->
+        expect(resizable).not.toHaveBeenCalled()
+        cell.trigger 'addedToParent'
+        expect(resizableInit).toHaveBeenCalledOnce()
+        cell.trigger 'addedToParent'
+        expect(resizableInit).toHaveBeenCalledOnce()
 
-        it 'should do nothing if there are no visible rows', ->
-          column = testView.columns.add {'attribute'}
-          expect(column.set).not.toHaveBeenCalled()
+      it 'should update the column\'s width attribute when cell is resized', ->
+        expect(column.get 'width').not.toBeDefined()
+        cell.trigger 'resize', mockEvent, mockUIObject
+        expect(column.get 'width').toBe 100
 
-        it 'should update each columns width, handleLeft and handleWidth based on the first visible row', ->
-          row = testView.collection.add {'attribute'}, silent: true
-          column = testView.columns.add {'attribute'}, silent: true
-          testView.render()
-          testView._updateOffsets()
-          expect(column.set).toHaveBeenCalledOnce()
-          expect(column.set.firstCall.args[0]).toImplement {'handleLeft', 'handleWidth', 'width'}
+      it 'should disable the resizable plugin when the columns resizable bit is set to false', ->
+        expect(resizable).not.toHaveBeenCalled()
+        cell.trigger 'addedToParent'
+        expect(resizableDisable).toHaveBeenCalledOnce()
+        expect(resizableDisable).toHaveBeenCalledWith 'option', 'disabled', true
+        column.set resizable: true
+        expect(resizableDisable).toHaveBeenCalledTwice()
+        expect(resizableDisable).toHaveBeenCalledWith 'option', 'disabled', false
 
-        it 'should allow widthFunction to be a function', ->
-          widthFunction = sinon.stub().returns 100
-          thisView = Oraculum.get 'muTableColumnWidth.TableMixin.Test.View',
-            container: document.body
-            columns: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
-            collection: Oraculum.get 'Disposable.muTableColumnWidth.TableMixin.Test.Collection'
-            widthFunction: widthFunction
-          row = thisView.collection.add {'attribute'}, silent: true
-          column = thisView.columns.add {'attribute'}, silent: true
-          thisView.render()
-          thisView._updateOffsets()
-          expect(widthFunction).toHaveBeenCalledOnce()
-          expect(column.get 'width').toBe 100
-          thisView.dispose()
+      it 'should destroy the resizable plugin when the cell is disposed', ->
+        expect(resizableDestroy).not.toHaveBeenCalled()
+        cell.trigger 'addedToParent'
+        expect(resizableDestroy).not.toHaveBeenCalled()
+        cell.dispose()
+        expect(resizableDestroy).toHaveBeenCalledOnce()
 
-      it 'should debounce invoke _updateOffsets on view visibilityChange', ->
-        testView.trigger 'visibilityChange'
-        waits(10) or runs ->
-          expect(_updateOffsets).toHaveBeenCalledOnce()
-
-      it 'should debounce invoke _updateOffsets on window/document resize', ->
-        $(window, document).resize()
-        waits(10) or runs ->
-          expect(_updateOffsets).toHaveBeenCalledOnce()
-
-      it 'should debounce invoke _updateOffsets on columns add/remove/reset', ->
-        testView.columns.trigger 'add'
-        waits(10) or runs ->
-          expect(_updateOffsets).toHaveBeenCalledOnce()
-
-          testView.columns.trigger 'remove'
-          waits(10) or runs ->
-            expect(_updateOffsets).toHaveBeenCalledTwice()
-
-            testView.columns.trigger 'reset'
-            waits(10) or runs ->
-              expect(_updateOffsets).toHaveBeenCalledThrice()
-
-      it 'should debounce invoke _updateOffsets on columns change:width/change:handleLeft', ->
-        column.set width: 100
-        waits(10) or runs ->
-          expect(_updateOffsets).toHaveBeenCalledOnce()
-
-          column.set handleLeft: 100
-          waits(10) or runs ->
-            expect(_updateOffsets).toHaveBeenCalledTwice()
-
-    describe '_MutableColumnWidthHandle.View', ->
-      column = column2 = null
-      testHandle = testHandle2 = null
+    describe 'muTableColumnWidth.RowMixin', ->
 
       beforeEach ->
-        testView.render()
-        column = testView.columns.add {'attribute'}
-        column2 = testView.columns.add {'attribute'}
-        testHandle = testView.subview('muTableHandles').getModelViews()[0]
-        testHandle2 = testView.subview('muTableHandles').getModelViews()[1]
+        row = Oraculum.get 'muTableColumnWidth.RowMixin.Test.View', {
+          columns, collection
+        }
 
-      describe 'interactjs configuration', ->
-        _onmove = null
+      afterEach ->
+        row.dispose()
 
-        beforeEach ->
-          _onmove = sinon.stub testHandle, '_onmove'
+      it 'should throw if mixed into an object that fails to implement Row.ViewMixin', ->
+        expect(-> Oraculum.get('View').__mixin 'muTableColumnWidth.RowMixin').toThrow()
 
-        afterEach ->
-          _onmove.restore()
+      it 'should throw if a row is rendered that fails to implement Row.ViewMixin', ->
+        row.mixinOptions.list.modelView = 'View'
+        expect(-> row.render()).toThrow()
 
-        it 'should be draggable', ->
-          interactable = interact testHandle.el
-          expect(interactable.options.draggable).toBe true
+      it 'should apply muTableColumnWidth.CellMixin to all rows', ->
+        row.render()
+        _.each row.getModelViews(), (cell) ->
+          expect(cell).toUseMixin 'muTableColumnWidth.CellMixin'
 
-        it 'should drag on the x axis', ->
-          interactable = interact testHandle.el
-          expect(interactable.options.dragAxis).toBe 'x'
+    describe 'muTableColumnWidth.TableMixin', ->
 
-        it 'should drag relative to itself', ->
-          interactable = interact testHandle.el
-          expect(interactable.options.origin).toBe testHandle.el
+      beforeEach ->
+        table = Oraculum.get 'muTableColumnWidth.TableMixin.Test.View', {
+          columns, collection
+        }
 
-        it 'should invoke _onmove on drag', ->
-          interactable = interact testHandle.el
-          interactable.ondragmove()
-          expect(_onmove).toHaveBeenCalledOnce()
+      afterEach ->
+        table.dispose()
 
-      describe 'reactionary behavior', ->
+      it 'should throw if mixed into an object that fails to implement Table.ViewMixin', ->
+        expect(-> Oraculum.get('View').__mixin 'muTableColumnWidth.TableMixin').toThrow()
 
-        it 'should update its "width" style based on the columns handleWidth', ->
-          handleWidth = 10
-          column.set {handleWidth}
-          expect(testHandle.$el.width()).toBe 10
+      it 'should throw if a row is rendered that fails to implement Row.ViewMixin', ->
+        table.mixinOptions.list.modelView = 'View'
+        expect(-> table.render()).toThrow()
 
-        it 'should update its "left" style based on the columns handleLeft/handleWidth', ->
-          handleLeft = 100
-          handleWidth = 10
-          column.set {handleLeft, handleWidth}
-          expected = handleLeft - (handleWidth / 2)
-          actual = parseInt testHandle.el.style.left, 10
-          expect(actual).toBe expected
-
-        it 'should update the width on the previous column on drag', ->
-          interactable = interact testHandle2.el
-          column.set width: 100
-          column2.set width: 100, handleLeft: 100
-          interactable.ondragmove({ pageX: 10 })
-          expect(column.get 'width').toBe 110
-          expect(column2.get 'width').toBe 90
-          expect(column2.get 'handleLeft').toBe 110
+      it 'should apply muTableColumnWidth.RowMixin to all rows', ->
+        table.render()
+        _.each table.getModelViews(), (row) ->
+          expect(row).toUseMixin 'muTableColumnWidth.RowMixin'

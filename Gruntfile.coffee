@@ -66,8 +66,14 @@ module.exports = (grunt) ->
       spec:
         expand: true
         flatten: false
-        cwd: 'spec/'
-        src: ['**/*.spec.coffee']
+        cwd: '.'
+        src: [
+          'spec/**/*.spec.coffee'
+          # Import matchers from FactoryJS
+          'bower_components/factoryjs/spec/matchers.helper.coffee'
+          # Import automated convention specs from Oraculum
+          'bower_components/oraculum/spec/convention.spec.coffee'
+        ]
         dest: 'build/spec/'
         ext: '.spec.js'
       helper:
