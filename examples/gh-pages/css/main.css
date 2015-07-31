@@ -25,3 +25,13 @@ body {
 iframe {
   vertical-align: middle;
 }
+
+table {
+  table-layout: fixed;
+}
+
+th, td {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

@@ -1,180 +1,145 @@
 (function() {
-  define(['oraculum', 'muTable/libs', 'oraculum/mixins/listener', 'oraculum/mixins/disposable', 'oraculum/mixins/evented-method', 'oraculum/views/mixins/list', 'oraculum/views/mixins/attach', 'oraculum/views/mixins/subview', 'oraculum/views/mixins/auto-render', 'oraculum/views/mixins/static-classes', 'oraculum/plugins/tabular/views/mixins/table'], function(Oraculum) {
+  var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    slice = [].slice;
+
+  define(['oraculum', 'oraculum/plugins/tabular/views/mixins/variable-width-cell', 'jquery-ui/resizable'], function(Oraculum) {
     'use strict';
-    var interact;
-    interact = Oraculum.get('interact');
-    Oraculum.extend('View', '_MutableColumnWidthHandle.View', {
+    var RESIZE_EVENTS;
+    RESIZE_EVENTS = ['resize', 'resizestop', 'resizestart', 'resizecreate'];
+    Oraculum.defineMixin('muTableColumnWidth.CellMixin', {
       mixinOptions: {
-        staticClasses: ['muTable-column-width-handle-view'],
-        eventedMethods: {
-          render: {}
-        },
-        listen: {
-          'render:after this': '_update',
-          'change:handleWidth model': '_updateWidth',
-          'change:handleWidth change:handleLeft model': '_updateOffset'
-        }
-      },
-      _update: function() {
-        this._updateWidth();
-        this._updateOffset();
-        return this._interact();
-      },
-      _updateWidth: function() {
-        var handleWidth;
-        handleWidth = this.model.get('handleWidth');
-        return this.$el.css({
-          width: handleWidth
-        });
-      },
-      _updateOffset: function() {
-        var handleLeft, handleWidth;
-        handleLeft = this.model.get('handleLeft');
-        handleWidth = this.model.get('handleWidth');
-        return this.$el.css({
-          left: handleLeft - (handleWidth / 2)
-        });
-      },
-      _interact: function() {
-        var interactable;
-        interactable = interact(this.el);
-        interactable.origin(this.el);
-        return interactable.draggable({
-          onmove: (function(_this) {
-            return function() {
-              return _this._onmove.apply(_this, arguments);
-            };
-          })(this),
-          axis: 'x'
-        });
-      },
-      _onmove: function(_arg) {
-        var columns, handleLeft, pageX, prevColumn, prevWidth, thisIndex, thisWidth;
-        pageX = _arg.pageX;
-        columns = this.model.collection;
-        thisWidth = this.model.get('width');
-        thisIndex = columns.indexOf(this.model);
-        handleLeft = this.model.get('handleLeft');
-        prevColumn = columns.at(thisIndex - 1);
-        prevWidth = prevColumn.get('width');
-        prevColumn.set({
-          width: prevWidth + pageX
-        });
-        return this.model.set({
-          width: thisWidth - pageX,
-          handleLeft: handleLeft + pageX
-        });
-      }
-    }, {
-      mixins: ['Listener.Mixin', 'Disposable.Mixin', 'EventedMethod.Mixin', 'StaticClasses.ViewMixin']
-    });
-    Oraculum.extend('View', '_MutableColumnWidthHandles.View', {
-      tagName: 'aside',
-      mixinOptions: {
-        staticClasses: ['muTable-column-width-handles-view'],
-        list: {
-          modelView: '_MutableColumnWidthHandle.View'
-        }
-      }
-    }, {
-      mixins: ['Disposable.Mixin', 'List.ViewMixin', 'StaticClasses.ViewMixin', 'Attach.ViewMixin', 'AutoRender.ViewMixin']
-    });
-    return Oraculum.defineMixin('muTableColumnWidth.TableMixin', {
-      mixinOptions: {
-        staticClasses: ['muTable-column-width-table-mixin'],
         muTableColumnWidth: {
-          handleWidth: 4,
-          cellSelector: null,
-          widthFunction: 'outerWidth'
-        },
-        subviews: {
-          muTableHandles: function() {
-            return {
-              view: '_MutableColumnWidthHandles.View',
-              viewOptions: {
-                container: this.el,
-                collection: this.columns
-              }
-            };
-          }
+          target: null,
+          handles: 'e',
+          minWidth: 100,
+          containment: 'parent'
         }
       },
-      mixconfig: function(_arg, options) {
-        var cellSelector, handleWidth, muTableColumnWidth, widthFunction;
-        muTableColumnWidth = _arg.muTableColumnWidth;
-        if (options == null) {
-          options = {};
-        }
-        handleWidth = options.handleWidth, cellSelector = options.cellSelector, widthFunction = options.widthFunction;
-        if (handleWidth != null) {
-          muTableColumnWidth.handleWidth = handleWidth;
-        }
-        if (cellSelector != null) {
-          muTableColumnWidth.cellSelector = cellSelector;
-        }
-        if (widthFunction != null) {
-          return muTableColumnWidth.widthFunction = widthFunction;
-        }
+      mixconfig: function(mixinOptions, arg) {
+        var muTableColumnWidth;
+        muTableColumnWidth = (arg != null ? arg : {}).muTableColumnWidth;
+        return mixinOptions.muTableColumnWidth = Oraculum.composeConfig(mixinOptions.muTableColumnWidth, muTableColumnWidth);
       },
       mixinitialize: function() {
-        var debouncedUpdate;
-        debouncedUpdate = _.debounce(((function(_this) {
+        if (indexOf.call(this.__activeMixins(), 'Cell.ViewMixin') < 0) {
+          throw new TypeError('muTableColumnWidth.CellMixin must be used with Cell.ViewMixin.');
+        }
+        if (this.$el.parent().length > 0) {
+          this._initializeResizablePlugin();
+        }
+        this.on('addedToParent', (function(_this) {
           return function() {
-            return _this._updateOffsets();
+            return _this._initializeResizablePlugin.apply(_this, arguments);
           };
-        })(this)), 10);
-        this.on('visibilityChange', debouncedUpdate);
-        $(window, document).resize(debouncedUpdate);
-        this.listenTo(this.columns, 'add remove reset sort', debouncedUpdate);
-        return this.listenTo(this.columns, 'change:width change:handleLeft', debouncedUpdate);
+        })(this));
+        this.on('dispose', (function(_this) {
+          return function() {
+            return _this._destroyResizablePlugin.apply(_this, arguments);
+          };
+        })(this));
+        this.on('resize', (function(_this) {
+          return function(e, arg) {
+            var width;
+            width = arg.size.width;
+            return _this.column.set({
+              width: width
+            });
+          };
+        })(this));
+        return this.listenTo(this.column, 'change:resizable', (function(_this) {
+          return function() {
+            return _this._updateResizableEnabled();
+          };
+        })(this));
       },
-      _updateOffsets: function() {
-        var firstVisibleRow;
-        if (!(firstVisibleRow = _.find(this.getModelViews(), function(view) {
-          return view.$el.is(':visible');
-        }))) {
+      _initializeResizablePlugin: function() {
+        var $target, options;
+        if (this._resizablePluginInitialized) {
           return;
         }
-        if (_.isFunction(firstVisibleRow.getModelViews)) {
-          return this._updateViewOffsets(firstVisibleRow);
-        } else {
-          return this._updateElementOffsets(firstVisibleRow);
+        this._resizablePluginInitialized = true;
+        options = this.mixinOptions.muTableColumnWidth;
+        if (_.isFunction(options)) {
+          options = options.call(this);
         }
-      },
-      _updateViewOffsets: function(row) {
-        return _.each(row.getModelViews(), (function(_this) {
-          return function(view) {
-            return _this._updateCellOffset(view, view.$el, view.column);
+        $target = this._resolveResizableTarget();
+        $target.resizable(options);
+        _.each(RESIZE_EVENTS, (function(_this) {
+          return function(resizeEvent) {
+            return $target.on(resizeEvent, function() {
+              return _this.trigger.apply(_this, [resizeEvent].concat(slice.call(arguments)));
+            });
           };
         })(this));
+        return this._updateResizableEnabled();
       },
-      _updateElementOffsets: function(row) {
-        var cellSelector;
-        cellSelector = this.mixinOptions.muTableColumnWidth.cellSelector;
-        return _.each(row.$(cellSelector), (function(_this) {
-          return function(element) {
-            var $element, column;
-            $element = $(element);
-            column = $element.data('column');
-            column || (column = element.column);
-            return _this._updateCellOffset(null, $element, column);
-          };
-        })(this));
+      _updateResizableEnabled: function() {
+        var $target, enabled, options;
+        if (!this._resizablePluginInitialized) {
+          return;
+        }
+        enabled = Boolean(this.column.get('resizable'));
+        options = this.mixinOptions.muTableColumnWidth;
+        if (_.isFunction(options)) {
+          options = options.call(this);
+        }
+        $target = this._resolveResizableTarget();
+        $target.find('.ui-resizable-handle').toggle(enabled);
+        return $target.resizable('option', 'disabled', !enabled);
       },
-      _updateCellOffset: function(view, $element, column) {
-        var handleLeft, handleWidth, width, widthFunction;
-        handleWidth = this.mixinOptions.muTableColumnWidth.handleWidth;
-        widthFunction = this.mixinOptions.muTableColumnWidth.widthFunction;
-        width = _.isString(widthFunction) ? $element[widthFunction]() : widthFunction.call(view || $element);
-        handleLeft = $element.position().left;
-        return column.set({
-          width: width,
-          handleLeft: handleLeft,
-          handleWidth: handleWidth
-        });
+      _destroyResizablePlugin: function() {
+        if (!this._resizablePluginInitialized) {
+          return;
+        }
+        this._resolveResizableTarget().resizable('destroy');
+        return this._resizablePluginInitialized = false;
+      },
+      _resolveResizableTarget: function() {
+        var options;
+        options = this.mixinOptions.muTableColumnWidth;
+        if (_.isFunction(options)) {
+          options = options.call(this);
+        }
+        return Oraculum.resolveViewTarget(this, options.target);
       }
     }, {
-      mixins: ['Disposable.Mixin', 'Table.ViewMixin', 'Subview.ViewMixin', 'StaticClasses.ViewMixin']
+      mixins: ['VariableWidth.CellMixin']
+    });
+    Oraculum.defineMixin('muTableColumnWidth.RowMixin', {
+      mixinitialize: function() {
+        if (indexOf.call(this.__activeMixins(), 'Row.ViewMixin') < 0) {
+          throw new TypeError('muTableColumnWidth.RowMixin must be used with Row.ViewMixin.');
+        }
+        this._ensureResizableColumnCells();
+        return this.on('visibilityChange', (function(_this) {
+          return function() {
+            return _this._ensureResizableColumnCells.apply(_this, arguments);
+          };
+        })(this));
+      },
+      _ensureResizableColumnCells: function() {
+        return _.each(this.getModelViews(), function(view) {
+          return view.__mixin('muTableColumnWidth.CellMixin', {});
+        });
+      }
+    });
+    return Oraculum.defineMixin('muTableColumnWidth.TableMixin', {
+      mixinitialize: function() {
+        if (indexOf.call(this.__activeMixins(), 'Table.ViewMixin') < 0) {
+          throw new TypeError('muTableColumnWidth.TableMixin must be used with Table.ViewMixin.');
+        }
+        this._ensureResizableColumnRows();
+        return this.on('visibilityChange', (function(_this) {
+          return function() {
+            return _this._ensureResizableColumnRows.apply(_this, arguments);
+          };
+        })(this));
+      },
+      _ensureResizableColumnRows: function() {
+        return _.each(this.getModelViews(), function(view) {
+          return view.__mixin('muTableColumnWidth.RowMixin', {});
+        });
+      }
     });
   });
 

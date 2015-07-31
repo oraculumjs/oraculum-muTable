@@ -7,24 +7,19 @@ jasmineConfig =
     templateOptions:
       coverage: 'build/coverage/coverage.json'
       template: require 'grunt-template-jasmine-requirejs'
-      templateOptions:
-        requireConfig: require './require-config.json'
+      templateOptions: requireConfig: require './require-config.json'
       report:
         type: 'lcov'
         options:
           dir: 'build/coverage/lcov'
-    specs: [
-      'build/spec/**/*.helper.js'
-      'build/spec/**/*.spec.js'
-    ]
+    specs: ['build/spec/**/*.spec.js']
     helpers: [
-      'bower_components/sinon/lib/sinon.js'
-      'bower_components/sinon/lib/sinon/spy.js'
-      'bower_components/sinon/lib/sinon/**/*.js'
+      'bower_components/sinonjs/sinon.js'
       'bower_components/jasmine-sinon/lib/jasmine-sinon.js'
+      'bower_components/jquery/dist/jquery.js'
       'bower_components/jasmine-jquery/lib/jasmine-jquery.js'
-      'bower_components/jasmine-matchers-util/jasmine-matchers-1.3.0.js'
-      'bower_components/jasmine-matchers/src/to*.js'
+      'bower_components/jasmine-expect/dist/jasmine-matchers.js'
+      'build/spec/**/*.helper.js'
     ]
 
 module.exports = (grunt) ->
@@ -71,8 +66,14 @@ module.exports = (grunt) ->
       spec:
         expand: true
         flatten: false
-        cwd: 'spec/'
-        src: ['**/*.spec.coffee']
+        cwd: '.'
+        src: [
+          'spec/**/*.spec.coffee'
+          # Import matchers from FactoryJS
+          'bower_components/factoryjs/spec/matchers.helper.coffee'
+          # Import automated convention specs from Oraculum
+          'bower_components/oraculum/spec/convention.spec.coffee'
+        ]
         dest: 'build/spec/'
         ext: '.spec.js'
       helper:

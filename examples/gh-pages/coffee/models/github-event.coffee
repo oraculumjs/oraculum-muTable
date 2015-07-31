@@ -18,7 +18,11 @@ define [
       }, options
 
     parse: (response) ->
-      return response.data
+      return _.map response.data, ({id, type, actor, repo}) -> {
+        id, type
+        repo_name: repo.name
+        actor_login: actor.login
+      }
 
   }, {
     singleton: true
