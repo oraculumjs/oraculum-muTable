@@ -1,18 +1,13 @@
 (function() {
-  var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    slice = [].slice;
+  var slice = [].slice;
 
   define(['oraculum', 'oraculum/libs', 'oraculum/views/mixins/static-classes', 'oraculum/plugins/tabular/views/mixins/row', 'oraculum/plugins/tabular/views/mixins/cell', 'jquery-ui/sortable'], function(Oraculum) {
     'use strict';
-    var $, SORT_EVENTS, _;
-    $ = Oraculum.get('jQuery');
+    var SORT_EVENTS, _;
     _ = Oraculum.get('underscore');
     SORT_EVENTS = ['sortactivate', 'sortdeactivate', 'sortstart', 'sortbeforeStop', 'sortstop', 'sortcreate', 'sortremove', 'sortchange', 'sortupdate', 'sort', 'sortout', 'sortover', 'sortreceive'];
     Oraculum.defineMixin('muTableColumnOrder.CellMixin', {
       mixinitialize: function() {
-        if (indexOf.call(this.__activeMixins(), 'Cell.ViewMixin') < 0) {
-          throw new TypeError('muTableColumnOrder.CellMixin must be used with Cell.ViewMixin.');
-        }
         this.listenTo(this.column, 'change:orderable', (function(_this) {
           return function() {
             return _this._updateColumnOrderable();
@@ -42,9 +37,6 @@
         return mixinOptions.muTableColumnOrder = Oraculum.composeConfig(mixinOptions.muTableColumnOrder, muTableColumnOrder);
       },
       mixinitialize: function() {
-        if (indexOf.call(this.__activeMixins(), 'Row.ViewMixin') < 0) {
-          throw new TypeError('muTableColumnOrder.RowMixin must be used with Row.ViewMixin.');
-        }
         this._ensureSortableColumnCells();
         if (this.getModelViews().length > 0) {
           this._initSortablePlugin();
@@ -142,9 +134,6 @@
     });
     return Oraculum.defineMixin('muTableColumnOrder.TableMixin', {
       mixinitialize: function() {
-        if (indexOf.call(this.__activeMixins(), 'Table.ViewMixin') < 0) {
-          throw new TypeError('muTableColumnOrder.TableMixin must be used with Table.ViewMixin.');
-        }
         this.on('visibilityChange', (function(_this) {
           return function() {
             return _this._ensureSortableColumnRows();

@@ -1,14 +1,15 @@
 define [
   'oraculum'
   'oraculum/libs'
+
   'oraculum/views/mixins/static-classes'
   'oraculum/plugins/tabular/views/mixins/row'
   'oraculum/plugins/tabular/views/mixins/cell'
+
   'jquery-ui/sortable'
 ], (Oraculum) ->
   'use strict'
 
-  $ = Oraculum.get 'jQuery'
   _ = Oraculum.get 'underscore'
 
   # List of events extracted from http://api.jqueryui.com/sortable/
@@ -22,10 +23,6 @@ define [
   Oraculum.defineMixin 'muTableColumnOrder.CellMixin', {
 
     mixinitialize: ->
-      # Ensure our interface is respected.
-      throw new TypeError '''
-        muTableColumnOrder.CellMixin must be used with Cell.ViewMixin.
-      ''' unless 'Cell.ViewMixin' in @__activeMixins()
       @listenTo @column, 'change:orderable', => @_updateColumnOrderable()
       @_updateColumnOrderable()
 
@@ -54,10 +51,6 @@ define [
       )
 
     mixinitialize: ->
-      # Ensure our interface is respected.
-      throw new TypeError '''
-        muTableColumnOrder.RowMixin must be used with Row.ViewMixin.
-      ''' unless 'Row.ViewMixin' in @__activeMixins()
       @_ensureSortableColumnCells()
       # If we're late-bound, initilize the plugin
       @_initSortablePlugin() if @getModelViews().length > 0
@@ -119,10 +112,6 @@ define [
   Oraculum.defineMixin 'muTableColumnOrder.TableMixin', {
 
     mixinitialize: ->
-      # Ensure our interface is respected.
-      throw new TypeError '''
-        muTableColumnOrder.TableMixin must be used with Table.ViewMixin.
-      ''' unless 'Table.ViewMixin' in @__activeMixins()
       @on 'visibilityChange', => @_ensureSortableColumnRows()
       @_ensureSortableColumnRows()
 

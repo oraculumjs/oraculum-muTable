@@ -39,10 +39,15 @@
         </td>
         <td class="code highlight"><div class="highlight"><pre><span class="nx">define</span> <span class="p">[</span>
   <span class="s">&#39;oraculum&#39;</span>
+  <span class="s">&#39;oraculum/libs&#39;</span>
+
   <span class="s">&#39;oraculum/plugins/tabular/views/mixins/variable-width-cell&#39;</span>
+
   <span class="s">&#39;jquery-ui/resizable&#39;</span>
 <span class="p">],</span> <span class="nf">(Oraculum) -&gt;</span>
   <span class="s">&#39;use strict&#39;</span>
+
+  <span class="nv">_ = </span><span class="nx">Oraculum</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;underscore&#39;</span>
 
 
 </pre></div>
@@ -100,21 +105,6 @@
 <div class="pilwrap">
   <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
 </div>
-<p>Ensure our interface is respected.</p>
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
-      <span class="k">throw</span> <span class="k">new</span> <span class="nx">TypeError</span> <span class="s">&#39;&#39;&#39;</span>
-<span class="s">        muTableColumnWidth.CellMixin must be used with Cell.ViewMixin.</span>
-<span class="s">      &#39;&#39;&#39;</span> <span class="k">unless</span> <span class="s">&#39;Cell.ViewMixin&#39;</span> <span class="k">in</span> <span class="nx">@__activeMixins</span><span class="p">()</span>
-
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
-</div>
 <p>Initialize immediately if we're attached to a node</p>
         </td>
         <td class="code highlight"><div class="highlight"><pre>
@@ -126,7 +116,7 @@
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
 </div>
 <p>Else, wait for an event that denotes we've been attached</p>
         </td>
@@ -139,7 +129,7 @@
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
 </div>
 <p>Ensure that the plugin gets disposed for memory management.</p>
         </td>
@@ -152,7 +142,7 @@
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
+  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
 </div>
 <p>Update the column model's width attribute on resize</p>
         </td>
@@ -165,7 +155,7 @@
       <tr>
         <td class="docs">
 <div class="pilwrap">
-  <a class="pilcrow" href="#section-9" id="section-9">&#182;</a>
+  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
 </div>
 <p>Ensure that we update the plugin if the column changes</p>
         </td>
@@ -208,21 +198,6 @@
   <span class="nx">Oraculum</span><span class="p">.</span><span class="nx">defineMixin</span> <span class="s">&#39;muTableColumnWidth.RowMixin&#39;</span><span class="p">,</span> <span class="p">{</span>
 
     <span class="nv">mixinitialize: </span><span class="nf">-&gt;</span>
-
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-10" id="section-10">&#182;</a>
-</div>
-<p>Ensure our interface is respected.</p>
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
-      <span class="k">throw</span> <span class="k">new</span> <span class="nx">TypeError</span> <span class="s">&#39;&#39;&#39;</span>
-<span class="s">        muTableColumnWidth.RowMixin must be used with Row.ViewMixin.</span>
-<span class="s">      &#39;&#39;&#39;</span> <span class="k">unless</span> <span class="s">&#39;Row.ViewMixin&#39;</span> <span class="k">in</span> <span class="nx">@__activeMixins</span><span class="p">()</span>
       <span class="nx">@_ensureResizableColumnCells</span><span class="p">()</span>
       <span class="nx">@</span><span class="kc">on</span> <span class="s">&#39;visibilityChange&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
         <span class="nx">@_ensureResizableColumnCells</span> <span class="nx">arguments</span><span class="p">...</span>
@@ -236,21 +211,6 @@
   <span class="nx">Oraculum</span><span class="p">.</span><span class="nx">defineMixin</span> <span class="s">&#39;muTableColumnWidth.TableMixin&#39;</span><span class="p">,</span> <span class="p">{</span>
 
     <span class="nv">mixinitialize: </span><span class="nf">-&gt;</span>
-
-</pre></div>
-        </td>
-      </tr>
-      <tr>
-        <td class="docs">
-<div class="pilwrap">
-  <a class="pilcrow" href="#section-11" id="section-11">&#182;</a>
-</div>
-<p>Ensure our interface is respected.</p>
-        </td>
-        <td class="code highlight"><div class="highlight"><pre>
-      <span class="k">throw</span> <span class="k">new</span> <span class="nx">TypeError</span> <span class="s">&#39;&#39;&#39;</span>
-<span class="s">        muTableColumnWidth.TableMixin must be used with Table.ViewMixin.</span>
-<span class="s">      &#39;&#39;&#39;</span> <span class="k">unless</span> <span class="s">&#39;Table.ViewMixin&#39;</span> <span class="k">in</span> <span class="nx">@__activeMixins</span><span class="p">()</span>
       <span class="nx">@_ensureResizableColumnRows</span><span class="p">()</span>
       <span class="nx">@</span><span class="kc">on</span> <span class="s">&#39;visibilityChange&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
         <span class="nx">@_ensureResizableColumnRows</span> <span class="nx">arguments</span><span class="p">...</span>

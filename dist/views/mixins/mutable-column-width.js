@@ -1,10 +1,10 @@
 (function() {
-  var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    slice = [].slice;
+  var slice = [].slice;
 
-  define(['oraculum', 'oraculum/plugins/tabular/views/mixins/variable-width-cell', 'jquery-ui/resizable'], function(Oraculum) {
+  define(['oraculum', 'oraculum/libs', 'oraculum/plugins/tabular/views/mixins/variable-width-cell', 'jquery-ui/resizable'], function(Oraculum) {
     'use strict';
-    var RESIZE_EVENTS;
+    var RESIZE_EVENTS, _;
+    _ = Oraculum.get('underscore');
     RESIZE_EVENTS = ['resize', 'resizestop', 'resizestart', 'resizecreate'];
     Oraculum.defineMixin('muTableColumnWidth.CellMixin', {
       mixinOptions: {
@@ -21,9 +21,6 @@
         return mixinOptions.muTableColumnWidth = Oraculum.composeConfig(mixinOptions.muTableColumnWidth, muTableColumnWidth);
       },
       mixinitialize: function() {
-        if (indexOf.call(this.__activeMixins(), 'Cell.ViewMixin') < 0) {
-          throw new TypeError('muTableColumnWidth.CellMixin must be used with Cell.ViewMixin.');
-        }
         if (this.$el.parent().length > 0) {
           this._initializeResizablePlugin();
         }
@@ -107,9 +104,6 @@
     });
     Oraculum.defineMixin('muTableColumnWidth.RowMixin', {
       mixinitialize: function() {
-        if (indexOf.call(this.__activeMixins(), 'Row.ViewMixin') < 0) {
-          throw new TypeError('muTableColumnWidth.RowMixin must be used with Row.ViewMixin.');
-        }
         this._ensureResizableColumnCells();
         return this.on('visibilityChange', (function(_this) {
           return function() {
@@ -125,9 +119,6 @@
     });
     return Oraculum.defineMixin('muTableColumnWidth.TableMixin', {
       mixinitialize: function() {
-        if (indexOf.call(this.__activeMixins(), 'Table.ViewMixin') < 0) {
-          throw new TypeError('muTableColumnWidth.TableMixin must be used with Table.ViewMixin.');
-        }
         this._ensureResizableColumnRows();
         return this.on('visibilityChange', (function(_this) {
           return function() {

@@ -1,9 +1,14 @@
 define [
   'oraculum'
+  'oraculum/libs'
+
   'oraculum/plugins/tabular/views/mixins/variable-width-cell'
+
   'jquery-ui/resizable'
 ], (Oraculum) ->
   'use strict'
+
+  _ = Oraculum.get 'underscore'
 
   # Extracted from http://api.jqueryui.com/resizable/
   RESIZE_EVENTS = [
@@ -30,10 +35,6 @@ define [
       )
 
     mixinitialize: ->
-      # Ensure our interface is respected.
-      throw new TypeError '''
-        muTableColumnWidth.CellMixin must be used with Cell.ViewMixin.
-      ''' unless 'Cell.ViewMixin' in @__activeMixins()
       # Initialize immediately if we're attached to a node
       @_initializeResizablePlugin() if @$el.parent().length > 0
       # Else, wait for an event that denotes we've been attached
@@ -81,10 +82,6 @@ define [
   Oraculum.defineMixin 'muTableColumnWidth.RowMixin', {
 
     mixinitialize: ->
-      # Ensure our interface is respected.
-      throw new TypeError '''
-        muTableColumnWidth.RowMixin must be used with Row.ViewMixin.
-      ''' unless 'Row.ViewMixin' in @__activeMixins()
       @_ensureResizableColumnCells()
       @on 'visibilityChange', =>
         @_ensureResizableColumnCells arguments...
@@ -98,10 +95,6 @@ define [
   Oraculum.defineMixin 'muTableColumnWidth.TableMixin', {
 
     mixinitialize: ->
-      # Ensure our interface is respected.
-      throw new TypeError '''
-        muTableColumnWidth.TableMixin must be used with Table.ViewMixin.
-      ''' unless 'Table.ViewMixin' in @__activeMixins()
       @_ensureResizableColumnRows()
       @on 'visibilityChange', =>
         @_ensureResizableColumnRows arguments...
