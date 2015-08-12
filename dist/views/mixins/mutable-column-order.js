@@ -51,7 +51,7 @@
             return _this._refreshSortablePlugin.apply(_this, arguments);
           };
         })(this));
-        this.on('dispose', (function(_this) {
+        this.on('dispose:before', (function(_this) {
           return function() {
             return _this._destroySortablePlugin.apply(_this, arguments);
           };

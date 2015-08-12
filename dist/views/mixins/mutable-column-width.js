@@ -29,7 +29,7 @@
             return _this._initializeResizablePlugin.apply(_this, arguments);
           };
         })(this));
-        this.on('dispose', (function(_this) {
+        this.on('dispose:before', (function(_this) {
           return function() {
             return _this._destroyResizablePlugin.apply(_this, arguments);
           };
