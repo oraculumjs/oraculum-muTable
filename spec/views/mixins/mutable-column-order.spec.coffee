@@ -130,7 +130,7 @@ define [
         row.render()
         expect(sortableRefresh).toHaveBeenCalled()
 
-      it 'should update the comparator on the target collection post sort', ->
+      it 'should update the sort order on the target collection post-sort', ->
         # Emulate a dom-level sorting event
         [attrCellView, nameCellView] = row.render()._subviews
         nameCellView.$el.insertBefore attrCellView.el

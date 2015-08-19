@@ -102,10 +102,10 @@ define [
 
     _handleSortableUpdate: ->
       nwo = @getSortableAttributeOrder()
-      @collection.comparator = (model) ->
+      @collection.models = @collection.sortBy (model) =>
         index = nwo.indexOf model.get 'attribute'
-        return if index > -1 then index else @length
-      @collection.sort()
+        return if index > -1 then index else @collection.length
+      @collection.trigger 'sort', @collection, {}
 
   }
 

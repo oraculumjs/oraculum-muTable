@@ -240,10 +240,10 @@
 
     <span class="nv">_handleSortableUpdate: </span><span class="nf">-&gt;</span>
       <span class="nv">nwo = </span><span class="nx">@getSortableAttributeOrder</span><span class="p">()</span>
-      <span class="vi">@collection.comparator = </span><span class="nf">(model) -&gt;</span>
+      <span class="vi">@collection.models = </span><span class="nx">@collection</span><span class="p">.</span><span class="nx">sortBy</span> <span class="nf">(model) =&gt;</span>
         <span class="nv">index = </span><span class="nx">nwo</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">model</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;attribute&#39;</span>
-        <span class="k">return</span> <span class="k">if</span> <span class="nx">index</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span> <span class="k">then</span> <span class="nx">index</span> <span class="k">else</span> <span class="nx">@length</span>
-      <span class="nx">@collection</span><span class="p">.</span><span class="nx">sort</span><span class="p">()</span>
+        <span class="k">return</span> <span class="k">if</span> <span class="nx">index</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span> <span class="k">then</span> <span class="nx">index</span> <span class="k">else</span> <span class="nx">@collection</span><span class="p">.</span><span class="nx">length</span>
+      <span class="nx">@collection</span><span class="p">.</span><span class="nx">trigger</span> <span class="s">&#39;sort&#39;</span><span class="p">,</span> <span class="nx">@collection</span><span class="p">,</span> <span class="p">{}</span>
 
   <span class="p">}</span>
 

@@ -120,16 +120,18 @@
       _handleSortableUpdate: function() {
         var nwo;
         nwo = this.getSortableAttributeOrder();
-        this.collection.comparator = function(model) {
-          var index;
-          index = nwo.indexOf(model.get('attribute'));
-          if (index > -1) {
-            return index;
-          } else {
-            return this.length;
-          }
-        };
-        return this.collection.sort();
+        this.collection.models = this.collection.sortBy((function(_this) {
+          return function(model) {
+            var index;
+            index = nwo.indexOf(model.get('attribute'));
+            if (index > -1) {
+              return index;
+            } else {
+              return _this.collection.length;
+            }
+          };
+        })(this));
+        return this.collection.trigger('sort', this.collection, {});
       }
     });
     return Oraculum.defineMixin('muTableColumnOrder.TableMixin', {
