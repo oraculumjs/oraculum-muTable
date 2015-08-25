@@ -7,15 +7,18 @@ define [
 
   'oraculum/models/mixins/disposable'
 
-  'muTable/views/mixins/mutable-column-order'
-  'muTable/views/mixins/mutable-column-width'
-
   'cs!libs'
   'cs!models/pages'
   'cs!mu/examples/gh-pages/coffee/models/column'
   'cs!mu/examples/gh-pages/coffee/models/github-event'
   'cs!mu/examples/gh-pages/coffee/views/github-event-table'
 ], (Oraculum, home) ->
+
+  resizable = $.fn.resizable
+  $.fn.resizable = ->
+    console.time 'resizable'
+    resizable.apply this, arguments
+    console.timeEnd 'resizable'
 
   # Since we're daisy chaining off an existing Oraculum application,
   # Grab a reference to the singleton Pages collection
@@ -78,10 +81,6 @@ define [
         columns: columns
         container: '#muTable-demo'
         collection: collection
-
-      # Inject our behaviors to the header subview of the table
-      table.subview('header').__mixin 'muTableColumnOrder.RowMixin'
-      table.subview('header').__mixin 'muTableColumnWidth.RowMixin'
 
   # Bootstrap the app
   require ['cs!index']

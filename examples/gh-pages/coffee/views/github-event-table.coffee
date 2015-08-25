@@ -10,6 +10,8 @@ define [
 
   'cs!mu/examples/gh-pages/coffee/views/github-event-row'
   'cs!mu/examples/gh-pages/coffee/views/table-header-row'
+
+  'muTable/views/mixins/mutable-column-width'
 ], (Oraculum) ->
   'use strict'
 
@@ -29,6 +31,13 @@ define [
           viewOptions:
             container: @$ 'thead'
             collection: @columns
+      muTableColumnWidth:
+        cellSelector: '.cell_view-mixin'
+        resizableOptions: {
+          # All configuration following selector are from jQueryUI Resizable.
+          # @see: http://api.jqueryui.com/resizable/
+          handles: 'e'
+        }
 
   }, {
     singleton: true
@@ -37,6 +46,7 @@ define [
       'Attach.ViewMixin'
       'StaticClasses.ViewMixin'
       'HTMLTemplating.ViewMixin'
+      'muTableColumnWidth.TableMixin'
       'AutoRender.ViewMixin'
     ]
   }

@@ -13,7 +13,7 @@ define [
     url: 'https://api.github.com/users/lookout/events'
 
     sync: (method, model, options) ->
-      Backbone.sync method, model, _.extend {
+      return Backbone.sync method, model, _.extend {
         dataType: 'jsonp'
       }, options
 
