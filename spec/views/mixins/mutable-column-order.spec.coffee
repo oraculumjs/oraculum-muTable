@@ -17,6 +17,13 @@ define [
 
   describe 'muTableColumnOrder mixin suite', ->
 
+    Oraculum.extend 'View', 'jQueryUISortable.ViewMixin.Test.View', {
+      mixinOptions: jQueryUISortable: '': {}
+    }, mixins: [
+      'Disposable.Mixin'
+      'jQueryUISortable.ViewMixin'
+    ]
+
     Oraculum.extend 'View', 'muTableColumnOrder.CellMixin.Test.View', {
     }, mixins: [
       'Disposable.Mixin'
@@ -25,7 +32,9 @@ define [
     ]
 
     Oraculum.extend 'View', 'muTableColumnOrder.RowMixin.Test.View', {
-      mixinOptions: list: modelView: 'Text.Cell'
+      mixinOptions:
+        list: modelView: 'Text.Cell'
+        muTableColumnOrder: rowSelector: null
     }, mixins: [
       'Disposable.Mixin'
       'Row.ViewMixin'
@@ -40,7 +49,9 @@ define [
     ]
 
     Oraculum.extend 'View', 'muTableColumnOrder.TableMixin.Test.View', {
-      mixinOptions: list: modelView: 'muTableColumnOrder.RowMixin.Test1.View'
+      mixinOptions:
+        list: modelView: 'muTableColumnOrder.RowMixin.Test1.View'
+        muTableColumnOrder: rowSelector: '.row_view-mixin'
     }, mixins: [
       'Disposable.Mixin'
       'Table.ViewMixin'
@@ -67,6 +78,39 @@ define [
       columns.__mixin('Disposable.CollectionMixin', { disposable: disposeModels: true }).dispose()
       collection.__mixin('Disposable.CollectionMixin', { disposable: disposeModels: true }).dispose()
 
+    describe 'jQueryUISortable.ViewMixin', ->
+
+      view = undefined
+      sortable = undefined
+      sortableRefresh = undefined
+
+      beforeEach ->
+        sortable = sinon.stub $.fn, 'sortable'
+        sortableRefresh = sortable.withArgs 'refresh'
+        view = Oraculum.get 'jQueryUISortable.ViewMixin.Test.View'
+
+      afterEach ->
+        view.dispose()
+        sortable.restore()
+
+      it 'should debounce initialize the plugin automatically', (done) ->
+        expect(sortable).not.toHaveBeenCalled()
+        setTimeout (-> done expect(sortable).toHaveBeenCalledOnce()), 110
+
+      it 'should debounce re-initialize the plugin on subviewCreated events', (done) ->
+        expect(sortable).not.toHaveBeenCalled()
+        view.trigger 'subviewCreated' # Multiple invocations to testing debounced behavior
+        view.trigger 'subviewCreated' # Multiple invocations to testing debounced behavior
+        view.trigger 'subviewCreated' # Multiple invocations to testing debounced behavior
+        setTimeout (-> done expect(sortable).toHaveBeenCalledOnce()), 110
+
+      it 'should debounce re-initialize the plugin on visibilityChange events', (done) ->
+        expect(sortable).not.toHaveBeenCalled()
+        view.trigger 'visibilityChange' # Multiple invocations to testing debounced behavior
+        view.trigger 'visibilityChange' # Multiple invocations to testing debounced behavior
+        view.trigger 'visibilityChange' # Multiple invocations to testing debounced behavior
+        setTimeout (-> done expect(sortable).toHaveBeenCalledOnce()), 110
+
     describe 'muTableColumnOrder.CellMixin', ->
 
       beforeEach -> cell = Oraculum.get 'muTableColumnOrder.CellMixin.Test.View', {model, column: attrColumn}
@@ -82,72 +126,45 @@ define [
 
     describe 'muTableColumnOrder.RowMixin', ->
 
-      sortable = undefined
-      sortableInit = undefined
-      sortableRefresh = undefined
-      sortableDestroy = undefined
-
       beforeEach ->
-        sortable = sinon.spy $.fn, 'sortable'
         row = Oraculum.get 'muTableColumnOrder.RowMixin.Test.View', {
           model
           modelView: 'Text.Cell'
           collection: columns
         }
-        sortableInit = sortable.withArgs row.mixinOptions.muTableColumnOrder
-        sortableRefresh = sortable.withArgs 'refresh'
-        sortableDestroy = sortable.withArgs 'destroy'
 
       afterEach ->
         row.dispose()
-        sortable.restore()
 
-      it 'should throw if mixed into an object that fails to implement Row.ViewMixin', ->
-        expect(-> Oraculum.get('View').__mixin 'muTableColumnOrder.RowMixin').toThrow()
-
-      it 'should throw if a cell is rendered that fails to implement Cell.ViewMixin', ->
-        row.mixinOptions.list.modelView = 'View'
-        expect(-> row.render()).toThrow()
-
-      it 'should apply muTableColumnOrder.CellMixin to all cells', ->
+      it 'should apply muTableColumnOrder.CellMixin to all cells', (done) ->
         row.render()
-        _.each row.getModelViews(), (cell) ->
+        setTimeout (-> done _.each row.getModelViews(), (cell) ->
           expect(cell).toUseMixin 'muTableColumnOrder.CellMixin'
+        ), 110
 
-      it 'should initialize the jQuery UI sortable plugin in the target row element only once', ->
-        expect(sortable).not.toHaveBeenCalled()
-        row.render()
-        expect(sortableInit).toHaveBeenCalledOnce()
-        row.render()
-        expect(sortableInit).toHaveBeenCalledOnce()
+      it 'should provide an interface to serialize the current sort order from the dom', (done) ->
+        [attrCellView, nameCellView] = row.render().getModelViews()
+        setTimeout (-> # Give the debounced plugin initializer an opportunity to execute.
+          expect(row.getSortableAttributeOrder()).toEqual ['attribute', 'name']
+          nameCellView.$el.insertBefore attrCellView.el
+          expect(row.getSortableAttributeOrder()).toEqual ['name', 'attribute']
+          done()
+        ), 110
 
-      it 'should refresh the jQuery UI sortable plugin on all `visibilityChange` events', ->
-        expect(sortable).not.toHaveBeenCalled()
-        row.render()
-        expect(sortableRefresh).toHaveBeenCalled()
-        expect(sortableRefresh).toHaveBeenCalledAfter sortableInit
-        sortableRefresh.reset()
-        row.render()
-        expect(sortableRefresh).toHaveBeenCalled()
-
-      it 'should update the sort order on the target collection post-sort', ->
+      it 'should update the sort order on the target collection post-sort', (done) ->
         # Emulate a dom-level sorting event
-        [attrCellView, nameCellView] = row.render()._subviews
-        nameCellView.$el.insertBefore attrCellView.el
-        attrColumnIndex = columns.indexOf attrColumn
-        nameColumnIndex = columns.indexOf nameColumn
-        expect(attrColumnIndex < nameColumnIndex).toBe true
-        row.$el.trigger 'sortupdate'
-        attrColumnIndex = columns.indexOf attrColumn
-        nameColumnIndex = columns.indexOf nameColumn
-        expect(attrColumnIndex < nameColumnIndex).toBe false
-
-      it 'should destroy the sortable plugin when the row is disposed', ->
-        expect(sortableDestroy).not.toHaveBeenCalled()
-        row.render()
-        expect(sortableDestroy).not.toHaveBeenCalled()
-        row.dispose()
-        expect(sortableDestroy).toHaveBeenCalledOnce()
+        [attrCellView, nameCellView] = row.render().getModelViews()
+        setTimeout (-> # Give the debounced plugin initializer an opportunity to execute.
+          nameCellView.$el.insertBefore attrCellView.el
+          attrColumnIndex = columns.indexOf attrColumn
+          nameColumnIndex = columns.indexOf nameColumn
+          expect(attrColumnIndex < nameColumnIndex).toBe true
+          row.$el.trigger 'sortupdate'
+          attrColumnIndex = columns.indexOf attrColumn
+          nameColumnIndex = columns.indexOf nameColumn
+          expect(attrColumnIndex < nameColumnIndex).toBe false
+          done()
+        ), 110
 
     describe 'muTableColumnOrder.TableMixin', ->
 
@@ -159,14 +176,9 @@ define [
       afterEach ->
         table.dispose()
 
-      it 'should throw if mixed into an object that fails to implement Table.ViewMixin', ->
-        expect(-> Oraculum.get('View').__mixin 'muTableColumnOrder.TableMixin').toThrow()
-
-      it 'should throw if a row is rendered that fails to implement Row.ViewMixin', ->
-        table.mixinOptions.list.modelView = 'View'
-        expect(-> table.render()).toThrow()
-
-      it 'should apply muTableColumnOrder.RowMixin to all rows', ->
+      it 'should apply muTableColumnOrder.RowMixin to all rows', (done) ->
         table.render()
-        _.each table.getModelViews(), (row) ->
+        setTimeout (-> done _.each table.getModelViews(), (row) ->
           expect(row).toUseMixin 'muTableColumnOrder.RowMixin'
+        ), 110
+

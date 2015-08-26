@@ -7,9 +7,6 @@ define [
 
   'oraculum/models/mixins/disposable'
 
-  'muTable/views/mixins/mutable-column-order'
-  'muTable/views/mixins/mutable-column-width'
-
   'cs!libs'
   'cs!models/pages'
   'cs!mu/examples/gh-pages/coffee/models/column'
@@ -78,10 +75,6 @@ define [
         columns: columns
         container: '#muTable-demo'
         collection: collection
-
-      # Inject our behaviors to the header subview of the table
-      table.subview('header').__mixin 'muTableColumnOrder.RowMixin'
-      table.subview('header').__mixin 'muTableColumnWidth.RowMixin'
 
   # Bootstrap the app
   require ['cs!index']

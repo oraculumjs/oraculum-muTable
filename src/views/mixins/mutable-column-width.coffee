@@ -10,97 +10,102 @@ define [
 
   _ = Oraculum.get 'underscore'
 
-  # Extracted from http://api.jqueryui.com/resizable/
-  RESIZE_EVENTS = [
-    'resize'
-    'resizestop'
-    'resizestart'
-    'resizecreate'
-  ]
-
-  Oraculum.defineMixin 'muTableColumnWidth.CellMixin', {
+  # This could be broken out as part of an Oraculum-jQueryUI project.
+  Oraculum.defineMixin 'jQueryUIResizable.ViewMixin',
 
     mixinOptions:
-      muTableColumnWidth:
-        target: null # # Defaults to this.$el
-        # All configuration under this line are options from jQueryUI Resizable.
-        # @see: http://api.jqueryui.com/resizable/
-        handles: 'e'
-        minWidth: 100
-        containment: 'parent'
+      jQueryUIResizable: {}
+        # '.selector': {
+        #   # All configuration following selector are from jQueryUI Resizable.
+        #   # @see: http://api.jqueryui.com/resizable/
+        # }
 
-    mixconfig: (mixinOptions, {muTableColumnWidth} = {}) ->
-      mixinOptions.muTableColumnWidth = Oraculum.composeConfig(
-        mixinOptions.muTableColumnWidth, muTableColumnWidth
+    mixconfig: (mixinOptions, {jQueryUIResizable} = {}) ->
+      mixinOptions.jQueryUIResizable = Oraculum.composeConfig(
+        mixinOptions.jQueryUIResizable, jQueryUIResizable
       )
 
     mixinitialize: ->
-      # Initialize immediately if we're attached to a node
-      @_initializeResizablePlugin() if @$el.parent().length > 0
-      # Else, wait for an event that denotes we've been attached
-      @on 'addedToParent', => @_initializeResizablePlugin arguments...
-      # Ensure that the plugin gets disposed for memory management.
-      @on 'dispose:before', => @_destroyResizablePlugin arguments...
-      # Update the column model's width attribute on resize
-      @on 'resize', (e, {size:{width}}) => @column.set { width }
-      # Ensure that we update the plugin if the column changes
-      @listenTo @column, 'change:resizable', => @_updateResizableEnabled()
+      # Debounce our initialize method to prevent flooding the plugin
+      # Check if we're disposed, since we're no longer on a synchronous call stack.
+      initializeResizablePlugin = _.debounce (=>
+        @_initializeResizablePlugin() unless @disposed
+      ), 100
+      # Reinitialize on subviewCreated for Subview.ViewMixin
+      @on 'subviewCreated', initializeResizablePlugin
+      # Reinitialize on visibilityChange for List.ViewMixin
+      @on 'visibilityChange', initializeResizablePlugin
+      # Initialize immediately
+      initializeResizablePlugin()
 
     _initializeResizablePlugin: ->
-      return if @_resizablePluginInitialized
-      @_resizablePluginInitialized = true
-      options = @mixinOptions.muTableColumnWidth
+      options = @mixinOptions.jQueryUIResizable
       options = options.call this if _.isFunction options
-      $target = @_resolveResizableTarget()
-      $target.resizable options
-      _.each RESIZE_EVENTS, (resizeEvent) =>
-        $target.on resizeEvent, =>
-          @trigger resizeEvent, arguments...
-      @_updateResizableEnabled()
+      # Iterate over our selectors, configs
+      _.each options, (options, selector) =>
+        selector = null if selector is '' # De-normalize for null selector.
+        options = options.call this if _.isFunction options
+        $target = Oraculum.resolveViewTarget this, selector
+        $target.resizable options unless $target.data('resizable')?
 
-    _updateResizableEnabled: ->
-      return unless @_resizablePluginInitialized
-      enabled = Boolean @column.get 'resizable'
-      options = @mixinOptions.muTableColumnWidth
-      options = options.call this if _.isFunction options
-      $target = @_resolveResizableTarget()
-      $target.find('.ui-resizable-handle').toggle enabled
-      $target.resizable 'option', 'disabled', not enabled
+  Oraculum.defineMixin 'muTableColumnWidth.CellMixin', {
 
-    _destroyResizablePlugin: ->
-      return unless @_resizablePluginInitialized
-      @_resolveResizableTarget().resizable 'destroy'
-      @_resizablePluginInitialized = false
-
-    _resolveResizableTarget: ->
-      options = @mixinOptions.muTableColumnWidth
-      options = options.call this if _.isFunction options
-      return Oraculum.resolveViewTarget this, options.target
+    mixinitialize: ->
+      # Update the column model's width attribute on resize
+      @$el.on 'resize', (e, {size:{width}}) => @column.set { width }
+      # Ensure that we update the plugin if the column changes
+      @listenTo @column, 'change:resizable', =>
+        @$el.resizable 'option', 'disabled', not @column.get 'resizable'
 
   }, mixins: ['VariableWidth.CellMixin']
 
+  # These mixins use iterators with List.ViewMixin to enhance incoming views
+  # Such that they can support our muTableWidth behaviors.
+  mixinOptions =
+    muTableColumnWidth:
+      cellSelector: undefined # Does nothing it not configured.
+      resizableOptions: {
+        handles: 'e'
+      } # jQuery UI resizable options
+
+  # The mixconfig for the following mixins are contextual configurations
+  # for using jQueryUIResizable.ViewMixin with the Oraculum 'Tabular' subsystem.
+  mixconfig = (mixinOptions, options = {}) ->
+    {muTableColumnWidthCellSelector, muTableColumnWidthResizableOptions} = options
+    cellSelector = muTableColumnWidthCellSelector or mixinOptions.muTableColumnWidth.cellSelector
+    cellSelector = '' if cellSelector is null # Normalize for 'null' target.
+    resizableOptions = Oraculum.composeConfig mixinOptions.muTableColumnWidth.resizableOptions, muTableColumnWidthResizableOptions
+    (jQueryUIResizableSpec = {})[cellSelector] = resizableOptions if cellSelector?
+    mixinOptions.jQueryUIResizable = Oraculum.composeConfig mixinOptions.jQueryUIResizable, jQueryUIResizableSpec
+
   Oraculum.defineMixin 'muTableColumnWidth.RowMixin', {
 
+    mixinOptions, mixconfig
+
     mixinitialize: ->
-      @_ensureResizableColumnCells()
-      @on 'visibilityChange', =>
-        @_ensureResizableColumnCells arguments...
+      ensureResizableColumnCells = _.debounce =>
+        @_ensureResizableColumnCells() unless @disposed
+      @on 'visibilityChange', ensureResizableColumnCells
+      ensureResizableColumnCells()
 
     _ensureResizableColumnCells: ->
       _.each @getModelViews(), (view) ->
         view.__mixin 'muTableColumnWidth.CellMixin', {}
 
-  }
+  }, mixins: ['jQueryUIResizable.ViewMixin']
 
   Oraculum.defineMixin 'muTableColumnWidth.TableMixin', {
 
+    mixinOptions, mixconfig
+
     mixinitialize: ->
-      @_ensureResizableColumnRows()
-      @on 'visibilityChange', =>
-        @_ensureResizableColumnRows arguments...
+      ensureResizableColumnRows = _.debounce =>
+        @_ensureResizableColumnRows() unless @disposed
+      @on 'visibilityChange', ensureResizableColumnRows
+      ensureResizableColumnRows()
 
     _ensureResizableColumnRows: ->
       _.each @getModelViews(), (view) ->
         view.__mixin 'muTableColumnWidth.RowMixin', {}
 
-  }
+  }, mixins: ['jQueryUIResizable.ViewMixin']
