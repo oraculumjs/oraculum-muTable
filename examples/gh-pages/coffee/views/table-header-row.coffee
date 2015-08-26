@@ -27,6 +27,8 @@ define [
     mixinOptions:
       list:
         modelView: 'SortableColumnHeader.Cell'
+      muTableColumnOrder:
+        rowSelector: null
 
   }, mixins: [
     'Row.ViewMixin'

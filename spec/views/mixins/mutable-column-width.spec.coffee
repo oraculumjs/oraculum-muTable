@@ -3,7 +3,6 @@ define [
   'oraculum/libs'
 
   'oraculum/mixins/disposable'
-  'oraculum/views/mixins/attach'
   'oraculum/models/mixins/disposable'
 
   'oraculum/plugins/tabular/views/mixins/table'
@@ -18,12 +17,11 @@ define [
 
   describe 'muTableColumnWidth mixin suite', ->
 
-    Oraculum.extend 'View', 'jQueryResizable.ViewMixin.Test.View', {
-      mixinOptions: jQueryResizable: '': { handles: 'e' }
+    Oraculum.extend 'View', 'jQueryUIResizable.ViewMixin.Test.View', {
+      mixinOptions: jQueryUIResizable: '': { handles: 'e' }
     }, mixins: [
       'Disposable.Mixin'
-      'Attach.ViewMixin'
-      'jQueryResizable.ViewMixin'
+      'jQueryUIResizable.ViewMixin'
     ]
 
     Oraculum.extend 'View', 'muTableColumnWidth.CellMixin.Test.View', {
@@ -74,17 +72,17 @@ define [
       columns.__mixin('Disposable.CollectionMixin', { disposable: disposeModels: true }).dispose()
       collection.__mixin('Disposable.CollectionMixin', { disposable: disposeModels: true }).dispose()
 
-    describe 'jQueryResizable.ViewMixin', ->
+    describe 'jQueryUIResizable.ViewMixin', ->
 
       view = undefined
       resizable = undefined
 
       beforeEach ->
         resizable = sinon.stub $.fn, 'resizable'
-        view = Oraculum.get 'jQueryResizable.ViewMixin.Test.View'
+        view = Oraculum.get 'jQueryUIResizable.ViewMixin.Test.View'
 
       afterEach ->
-        view.remove().dispose()
+        view.dispose()
         resizable.restore()
 
       it 'should debounce initialize the plugin automatically', (done) ->
@@ -143,20 +141,14 @@ define [
       afterEach ->
         row.dispose()
 
-      it 'should use jQueryResizable.ViewMixin', ->
-        expect(row).toUseMixin 'jQueryResizable.ViewMixin'
+      it 'should use jQueryUIResizable.ViewMixin', ->
+        expect(row).toUseMixin 'jQueryUIResizable.ViewMixin'
 
-      it 'should throw if mixed into an object that fails to implement Row.ViewMixin', ->
-        expect(-> Oraculum.get('View').__mixin 'muTableColumnWidth.RowMixin').toThrow()
-
-      it 'should throw if a row is rendered that fails to implement Row.ViewMixin', ->
-        row.mixinOptions.list.modelView = 'View'
-        expect(-> row.render()).toThrow()
-
-      it 'should apply muTableColumnWidth.CellMixin to all rows', ->
+      it 'should debounce apply muTableColumnWidth.CellMixin to all rows', (done) ->
         row.render()
-        _.each row.getModelViews(), (cell) ->
+        setTimeout (-> done _.each row.getModelViews(), (cell) ->
           expect(cell).toUseMixin 'muTableColumnWidth.CellMixin'
+        ), 100
 
     describe 'muTableColumnWidth.TableMixin', ->
 
@@ -168,17 +160,11 @@ define [
       afterEach ->
         table.dispose()
 
-      it 'should use jQueryResizable.ViewMixin', ->
-        expect(table).toUseMixin 'jQueryResizable.ViewMixin'
+      it 'should use jQueryUIResizable.ViewMixin', ->
+        expect(table).toUseMixin 'jQueryUIResizable.ViewMixin'
 
-      it 'should throw if mixed into an object that fails to implement Table.ViewMixin', ->
-        expect(-> Oraculum.get('View').__mixin 'muTableColumnWidth.TableMixin').toThrow()
-
-      it 'should throw if a row is rendered that fails to implement Row.ViewMixin', ->
-        table.mixinOptions.list.modelView = 'View'
-        expect(-> table.render()).toThrow()
-
-      it 'should apply muTableColumnWidth.RowMixin to all rows', ->
+      it 'should debounce apply muTableColumnWidth.RowMixin to all rows', (done) ->
         table.render()
-        _.each table.getModelViews(), (row) ->
+        setTimeout (-> done _.each table.getModelViews(), (row) ->
           expect(row).toUseMixin 'muTableColumnWidth.RowMixin'
+        ), 100

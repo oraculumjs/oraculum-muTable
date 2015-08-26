@@ -14,12 +14,6 @@ define [
   'cs!mu/examples/gh-pages/coffee/views/github-event-table'
 ], (Oraculum, home) ->
 
-  resizable = $.fn.resizable
-  $.fn.resizable = ->
-    console.time 'resizable'
-    resizable.apply this, arguments
-    console.timeEnd 'resizable'
-
   # Since we're daisy chaining off an existing Oraculum application,
   # Grab a reference to the singleton Pages collection
   # And dispose of it/all its models.

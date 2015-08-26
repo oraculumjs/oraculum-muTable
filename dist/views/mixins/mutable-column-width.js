@@ -1,17 +1,16 @@
 (function() {
   define(['oraculum', 'oraculum/libs', 'oraculum/plugins/tabular/views/mixins/variable-width-cell', 'jquery-ui/resizable'], function(Oraculum) {
     'use strict';
-    var RESIZE_EVENTS, _, mixconfig, mixinOptions;
+    var _, mixconfig, mixinOptions;
     _ = Oraculum.get('underscore');
-    RESIZE_EVENTS = ['resize', 'resizestop', 'resizestart', 'resizecreate'];
-    Oraculum.defineMixin('jQueryResizable.ViewMixin', {
+    Oraculum.defineMixin('jQueryUIResizable.ViewMixin', {
       mixinOptions: {
-        jQueryResizable: {}
+        jQueryUIResizable: {}
       },
       mixconfig: function(mixinOptions, arg) {
-        var jQueryResizable;
-        jQueryResizable = (arg != null ? arg : {}).jQueryResizable;
-        return mixinOptions.jQueryResizable = Oraculum.composeConfig(mixinOptions.jQueryResizable, jQueryResizable);
+        var jQueryUIResizable;
+        jQueryUIResizable = (arg != null ? arg : {}).jQueryUIResizable;
+        return mixinOptions.jQueryUIResizable = Oraculum.composeConfig(mixinOptions.jQueryUIResizable, jQueryUIResizable);
       },
       mixinitialize: function() {
         var initializeResizablePlugin;
@@ -28,18 +27,23 @@
       },
       _initializeResizablePlugin: function() {
         var options;
-        options = this.mixinOptions.jQueryResizable;
+        options = this.mixinOptions.jQueryUIResizable;
         if (_.isFunction(options)) {
           options = options.call(this);
         }
         return _.each(options, (function(_this) {
           return function(options, selector) {
             var $target;
+            if (selector === '') {
+              selector = null;
+            }
             if (_.isFunction(options)) {
               options = options.call(_this);
             }
-            $target = Oraculum.resolveViewTarget(_this, selector || null);
-            return $target.resizable(options);
+            $target = Oraculum.resolveViewTarget(_this, selector);
+            if ($target.data('resizable') == null) {
+              return $target.resizable(options);
+            }
           };
         })(this));
       }
@@ -67,32 +71,41 @@
     mixinOptions = {
       muTableColumnWidth: {
         cellSelector: void 0,
-        resizableOptions: {}
+        resizableOptions: {
+          handles: 'e'
+        }
       }
     };
     mixconfig = function(mixinOptions, options) {
-      var cellSelector, jQueryResizableSpec, muTableColumnWidthCellSelector, muTableColumnWidthResizableOptions, resizableOptions;
+      var cellSelector, jQueryUIResizableSpec, muTableColumnWidthCellSelector, muTableColumnWidthResizableOptions, resizableOptions;
       if (options == null) {
         options = {};
       }
       muTableColumnWidthCellSelector = options.muTableColumnWidthCellSelector, muTableColumnWidthResizableOptions = options.muTableColumnWidthResizableOptions;
       cellSelector = muTableColumnWidthCellSelector || mixinOptions.muTableColumnWidth.cellSelector;
+      if (cellSelector === null) {
+        cellSelector = '';
+      }
       resizableOptions = Oraculum.composeConfig(mixinOptions.muTableColumnWidth.resizableOptions, muTableColumnWidthResizableOptions);
       if (cellSelector != null) {
-        (jQueryResizableSpec = {})[cellSelector] = resizableOptions;
+        (jQueryUIResizableSpec = {})[cellSelector] = resizableOptions;
       }
-      return mixinOptions.jQueryResizable = Oraculum.composeConfig(mixinOptions.jQueryResizable, jQueryResizableSpec);
+      return mixinOptions.jQueryUIResizable = Oraculum.composeConfig(mixinOptions.jQueryUIResizable, jQueryUIResizableSpec);
     };
     Oraculum.defineMixin('muTableColumnWidth.RowMixin', {
       mixinOptions: mixinOptions,
       mixconfig: mixconfig,
       mixinitialize: function() {
-        this._ensureResizableColumnCells();
-        return this.on('visibilityChange', (function(_this) {
+        var ensureResizableColumnCells;
+        ensureResizableColumnCells = _.debounce((function(_this) {
           return function() {
-            return _this._ensureResizableColumnCells.apply(_this, arguments);
+            if (!_this.disposed) {
+              return _this._ensureResizableColumnCells();
+            }
           };
         })(this));
+        this.on('visibilityChange', ensureResizableColumnCells);
+        return ensureResizableColumnCells();
       },
       _ensureResizableColumnCells: function() {
         return _.each(this.getModelViews(), function(view) {
@@ -100,18 +113,22 @@
         });
       }
     }, {
-      mixins: ['jQueryResizable.ViewMixin']
+      mixins: ['jQueryUIResizable.ViewMixin']
     });
     return Oraculum.defineMixin('muTableColumnWidth.TableMixin', {
       mixinOptions: mixinOptions,
       mixconfig: mixconfig,
       mixinitialize: function() {
-        this._ensureResizableColumnRows();
-        return this.on('visibilityChange', (function(_this) {
+        var ensureResizableColumnRows;
+        ensureResizableColumnRows = _.debounce((function(_this) {
           return function() {
-            return _this._ensureResizableColumnRows.apply(_this, arguments);
+            if (!_this.disposed) {
+              return _this._ensureResizableColumnRows();
+            }
           };
         })(this));
+        this.on('visibilityChange', ensureResizableColumnRows);
+        return ensureResizableColumnRows();
       },
       _ensureResizableColumnRows: function() {
         return _.each(this.getModelViews(), function(view) {
@@ -119,7 +136,7 @@
         });
       }
     }, {
-      mixins: ['jQueryResizable.ViewMixin']
+      mixins: ['jQueryUIResizable.ViewMixin']
     });
   });
 
